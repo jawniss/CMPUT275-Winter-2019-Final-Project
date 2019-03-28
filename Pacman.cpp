@@ -195,6 +195,58 @@ ___|             |___
 
   tft.drawLine(110, 270, 110, 300, ILI9341_WHITE);
   tft.drawLine(130, 270, 130, 300, ILI9341_WHITE);
+
+  tft.drawLine(110, 240, 110,210, ILI9341_WHITE);
+  tft.drawLine( 130, 240, 130, 210, ILI9341_WHITE);
+
+  tft.drawLine(110, 210, 20, 210 ,ILI9341_WHITE);
+  tft.drawLine( 130, 210, 220, 210,ILI9341_WHITE);
+
+  tft.drawLine(20, 210, 20, 240 ,ILI9341_WHITE);
+  tft.drawLine(220, 210, 220, 240 ,ILI9341_WHITE);
+
+  tft.drawLine(20, 240, 40, 240 ,ILI9341_WHITE);
+  tft.drawLine(220, 240, 200, 240 ,ILI9341_WHITE);
+
+  tft.drawLine(40, 240, 40, 270 ,ILI9341_WHITE);
+  tft.drawLine(200, 240, 200, 270 ,ILI9341_WHITE);
+
+  tft.drawLine(60, 240, 60, 30 ,ILI9341_WHITE);
+  tft.drawLine(180, 240, 180, 30 ,ILI9341_WHITE);
+
+  tft.drawLine(20,30,110,30 ,ILI9341_WHITE);
+  tft.drawLine(130,30,220,30 ,ILI9341_WHITE);
+
+  tft.drawLine(110, 30, 110, 70 ,ILI9341_WHITE);
+  tft.drawLine(130, 30, 130, 70 ,ILI9341_WHITE);
+
+  tft.drawLine(20,30,20,110 ,ILI9341_WHITE);
+  tft.drawLine(220,30,220,110 ,ILI9341_WHITE);
+
+  tft.drawLine(20,70,220,70 ,ILI9341_WHITE);
+
+  tft.drawLine(20,110,60,110 ,ILI9341_WHITE);
+  tft.drawLine(180,110,220,110 ,ILI9341_WHITE);
+
+  tft.drawLine(90,70,90,110 ,ILI9341_WHITE);
+  tft.drawLine(150,70,150,110 ,ILI9341_WHITE);
+
+  tft.drawLine(90,110,110,110 ,ILI9341_WHITE);
+  tft.drawLine(130,110,150,110,ILI9341_WHITE);
+
+  tft.drawLine(0,160,90,160 ,ILI9341_YELLOW);
+  tft.drawLine(150,160,240,160 ,ILI9341_YELLOW);
+
+  tft.drawLine(90,130,90,210,ILI9341_YELLOW);
+  tft.drawLine(150,130,150,210 ,ILI9341_YELLOW);
+
+  tft.drawLine(90,130,150,130 ,ILI9341_YELLOW);
+
+  tft.drawLine(110,110,110,130,ILI9341_YELLOW);
+  tft.drawLine(130,110,130,130,ILI9341_YELLOW);
+
+  tft.drawLine(90,185,150,185 ,ILI9341_YELLOW);
+
 }
 
 
@@ -357,7 +409,9 @@ void movement() {
   // Serial.println(cursorY);
   // Serial.println();
 
-  // BOTTTOM HALF
+  // BOTTTOM HALF: main problem is if you are diagonal with joystick at intersection,
+  // it gets stuck -> we could leave it and put it in read me
+  // starting line
   if (cursorX > 60 && cursorX < 180) {
     if (cursorY == 240) {
       if (xVal > 555) {
@@ -366,11 +420,13 @@ void movement() {
         xmove = -2;
       }
     }
+    //left down from starting position
   } else if (cursorX == 60) {
-    if (xVal > 555) {
-      xmove = 2;
+    if (cursorY > 232 && cursorY < 248 && xVal > 555) {
+      cursorX = 62;
+      cursorY = 240;
     }
-    if (cursorY == 240) {
+    if (cursorY == 30) {
       if (yVal > 567) {
         ymove = 2;
       }
@@ -379,13 +435,18 @@ void movement() {
         ymove = -2;
       }
     }
-    if (cursorY > 240 && cursorY < 270 ) {
+    if (cursorY > 30 && cursorY < 270 ) {
       if (yVal > 567) {
         ymove = 2;
       } else if (yVal < 467) {
         ymove = -2;
       }
     }
+
+
+
+
+
   }
 
 
