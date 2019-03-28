@@ -385,69 +385,99 @@ void movement() {
     return;
   }
   // // For pacman we don't want to have variable speed movement
-  // if (yVal > 555) {
-  //   xmove = 2;
-  // }
-  // else if (yVal < 455) {
-  //   xmove = -2;
-  // }
-  // else {
-  //   xmove = 0;
-  // }
-  // if (xVal > 567) {
-  //   ymove = 2;
-  // }
-  // else if (xVal < 467) {
-  //   ymove = -2;
-  // }
-  // else {
-  //   ymove = 0;
-  // }
-  // cursorX += xmove;
-  // cursorY += ymove;
+  if (yVal > 567) {
+    ymove = 2;
+  }
+  else if (yVal < 467) {
+    ymove = -2;
+  }
+  else {
+    ymove = 0;
+  }
+  if (xVal > 555) {
+    xmove = 2;
+  }
+  else if (xVal < 455) {
+    xmove = -2;
+  }
+  else {
+    xmove = 0;
+  }
   // Serial.println(cursorX);
   // Serial.println(cursorY);
   // Serial.println();
 
-  // BOTTTOM HALF: main problem is if you are diagonal with joystick at intersection,
-  // it gets stuck -> we could leave it and put it in read me
-  // starting line
-  if (cursorX > 60 && cursorX < 180) {
-    if (cursorY == 240) {
-      if (xVal > 555) {
-        xmove = 2;
-      } else if (xVal < 455) {
-        xmove = -2;
-      }
-    }
-    //left down from starting position
-  } else if (cursorX == 60) {
-    if (cursorY > 232 && cursorY < 248 && xVal > 555) {
-      cursorX = 62;
-      cursorY = 240;
-    }
-    if (cursorY == 30) {
-      if (yVal > 567) {
-        ymove = 2;
-      }
-    } else if (cursorY == 270) {
-      if (yVal < 467) {
-        ymove = -2;
-      }
-    }
-    if (cursorY > 30 && cursorY < 270 ) {
-      if (yVal > 567) {
-        ymove = 2;
-      } else if (yVal < 467) {
-        ymove = -2;
-      }
-    }
+  // // BOTTTOM HALF: main problem is if you are diagonal with joystick at intersection,
+  // // it gets stuck -> we could leave it and put it in read me
 
-
-
-
-
+//horizontal lines
+// line 1
+if (cursorX > 60 && cursorX < 180) {
+  if (cursorY == 240) {
+    cursorY = constrain(cursorY, 240, 240);
+    ymove = 0;
+    cursorX = constrain(cursorX, 60, 180);
+    // line 2
   }
+  // else if (cursorY == ___________) {
+  //
+  // }
+}
+
+//vertical lines
+// line 1
+if (cursorY < 270 && cursorY > 30) {
+  if (cursorX == 60) {
+    cursorX = constrain(cursorX, 60, 60);
+    xmove = 0;
+    cursorY = constrain(cursorY, 30, 270);
+  }
+}
+//line 2
+if (cursorY < 270 && cursorY > 30) {
+  if (cursorX == 180) {
+    cursorX = constrain(cursorX, 180, 180);
+    xmove = 0;
+    cursorY = constrain(cursorY, 30, 270);
+  }
+}
+
+
+
+//intersections
+// inter 1
+  if (cursorX == 60 && cursorY == 240) {
+    if (xVal > 555) {
+      cursorY = constrain(cursorY, 240, 240);
+      xmove = 2;
+      ymove =0;
+    }
+    if (yVal > 567 || yVal < 467) {
+      cursorX = constrain(cursorX, 60, 60);
+      xmove = 0;
+    }
+    if (xVal < 455) {
+      xmove = 0;
+    }
+  }
+  // inter 2
+    if (cursorX == 180 && cursorY == 240) {
+      if (xVal > 555) {
+        cursorY = constrain(cursorY, 240, 240);
+        xmove = 0;
+      }
+      if (yVal > 567 || yVal < 467) {
+        cursorX = constrain(cursorX, 180, 180);
+        xmove = 0;
+      }
+      if (xVal < 455) {
+        xmove = -2;
+        ymove = 0;
+      }
+    }
+
+
+
 
 
 
