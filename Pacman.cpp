@@ -1,13 +1,15 @@
 /*
 
 
-Need to figure out how to make "barriers" the walls that the
-pacman can't move past
-  FOR THE WALLS, INSTEAD I COULD SIMPLY CONSTRAIN THE MOVEMENTS OF PACMAN?
-  DO THE SAME GENERAL PROCESS, BUT JUST DO IF YOU'RE IN THIS AREA,
-  YOUR MOVEMENTS ARE CONFINED TO THIS line
-    THIS WOULD ALSO MAKE THE GAM EOVERALL LESS JANKY, CUS NO ADDITIONAL
-    SID ETO SIDE MOVEMENTS ALONE A CORRIDOR
+FOR THE GHOSTS, RESTRAINING THEM TO THE PATHS, THIS IS WHAT TO DO:
+CHANGE 'cursorX' AND cursorY TO GHOSTX AND GHOSTY
+CHANGE THE if (xVal > 555)
+TO if (ghostpos == 1, 2, 3)
+ETC ::::::: 1 IF THE GHOST IS BELOW, 2 IF THE GHOST
+IS ABOVE, 3 IF ... ETC
+
+
+
 
 For the score dots, when pacman moves over them they don't get
 redrawn, perfect for this project
@@ -403,48 +405,123 @@ void movement() {
   else {
     xmove = 0;
   }
-  // Serial.println(cursorX);
-  // Serial.println(cursorY);
-  // Serial.println();
 
-  // // BOTTTOM HALF: main problem is if you are diagonal with joystick at intersection,
-  // // it gets stuck -> we could leave it and put it in read me
 
-//horizontal lines
+  // // BOTTTOM HALF
+
+//HORIZTONAL lines
 // line 1
 if (cursorX > 60 && cursorX < 180) {
   if (cursorY == 240) {
     cursorY = constrain(cursorY, 240, 240);
     ymove = 0;
     cursorX = constrain(cursorX, 60, 180);
-    // line 2
   }
-  // else if (cursorY == ___________) {
-  //
-  // }
+
 }
 
-//vertical lines
+if (cursorX >20 && cursorX < 60) {
+  if (cursorY == 270) {
+    cursorY = constrain(cursorY, 270, 270);
+    ymove = 0;
+    cursorX = constrain(cursorX, 20, 60);
+  }
+}
+if (cursorX >180 && cursorX < 220) {
+  if (cursorY == 270) {
+    cursorY = constrain(cursorY, 270, 270);
+    ymove = 0;
+    cursorX = constrain(cursorX, 180, 270);
+  }
+}
+
+
+if (cursorX >90 && cursorX < 110) {
+  if (cursorY == 270) {
+    cursorY = constrain(cursorY, 270, 270);
+    ymove = 0;
+    cursorX = constrain(cursorX, 90, 110);
+  }
+}
+if (cursorX >130 && cursorX < 150) {
+  if (cursorY == 270) {
+    cursorY = constrain(cursorY, 270, 270);
+    ymove = 0;
+    cursorX = constrain(cursorX, 130, 150);
+  }
+}
+if (cursorX > 20 && cursorX < 300) {
+  if (cursorY == 300) {
+    cursorY = constrain(cursorY, 300, 300);
+    ymove = 0;
+    cursorX = constrain(cursorX, 20, 300);
+  }
+}
+
+
+
+
+
+
+
+//VERTICAL lines
 // line 1
 if (cursorY < 270 && cursorY > 30) {
   if (cursorX == 60) {
     cursorX = constrain(cursorX, 60, 60);
     xmove = 0;
     cursorY = constrain(cursorY, 30, 270);
-  }
-}
-//line 2
-if (cursorY < 270 && cursorY > 30) {
-  if (cursorX == 180) {
+  } else if (cursorX == 180) {
     cursorX = constrain(cursorX, 180, 180);
     xmove = 0;
     cursorY = constrain(cursorY, 30, 270);
   }
 }
 
+//line 3
+if (cursorY < 300 && cursorY > 270) {
+  if (cursorX == 20) {
+    cursorX = constrain(cursorX, 20, 20);
+    xmove = 0;
+    cursorY = constrain(cursorY, 270, 300);
+  } else if (cursorX == 220) {
+    cursorX = constrain(cursorX, 220, 220);
+    xmove = 0;
+    cursorY = constrain(cursorY, 270, 300);
+  }
+}
+//line 4
+if (cursorY < 270 && cursorY > 240) {
+  if (cursorX == 90) {
+    cursorX = constrain(cursorX, 90, 90);
+    xmove = 0;
+    cursorY = constrain(cursorY, 240, 270);
+  } else if (cursorX == 150) {
+    cursorX = constrain(cursorX, 150, 150);
+    xmove = 0;
+    cursorY = constrain(cursorY, 240, 270);
+  }
+}
 
 
-//intersections
+if (cursorY < 300 && cursorY > 270) {
+  if (cursorX == 110) {
+    cursorX = constrain(cursorX, 110, 110);
+    xmove = 0;
+    cursorY = constrain(cursorY, 270, 300);
+  } else if (cursorX == 130) {
+    cursorX = constrain(cursorX, 130, 130);
+    xmove = 0;
+    cursorY = constrain(cursorY, 270, 300);
+  }
+}
+
+
+
+
+
+
+//INTERSECTIONS
 // inter 1
   if (cursorX == 60 && cursorY == 240) {
     if (xVal > 555) {
@@ -463,7 +540,6 @@ if (cursorY < 270 && cursorY > 30) {
   // inter 2
     if (cursorX == 180 && cursorY == 240) {
       if (xVal > 555) {
-        cursorY = constrain(cursorY, 240, 240);
         xmove = 0;
       }
       if (yVal > 567 || yVal < 467) {
@@ -475,9 +551,241 @@ if (cursorY < 270 && cursorY > 30) {
         ymove = 0;
       }
     }
+  // inter 3
+    if (cursorX == 60 && cursorY == 270) {
+      if (xVal > 555) {
+        cursorY = constrain(cursorY, 270, 270);
+
+        xmove = 0;
+      }
+      if (yVal > 567) {
+        ymove = 0;
+      }
+      if (xVal < 455) {
+        cursorY = constrain(cursorY, 270, 270);
+        xmove = -2;
+        ymove = 0;
+      }
+    }
+  // inter 4
+    if (cursorX == 180 && cursorY == 270) {
+      if (xVal > 555) {
+        cursorY = constrain(cursorY, 270, 270);
+        xmove = 2;
+        ymove = 0;
+      }
+      if (yVal > 567) {
+        ymove = 0;
+      }
+      if (xVal < 455) {
+        cursorY = constrain(cursorY, 270, 270);
+        xmove = 0;
+      }
+    }
+  // inter 5
+    if (cursorX == 20 && cursorY == 270) {
+      if (xVal > 555) {
+        cursorY = constrain(cursorY, 270, 270);
+        xmove = 2;
+        ymove = 0;
+      }
+      if (yVal > 567) {
+        ymove = 2;
+      } else if (yVal < 467) {
+        ymove = 0;
+      }
+      if (xVal < 455) {
+        cursorY = constrain(cursorY, 270, 270);
+        xmove = 0;
+      }
+    }
+  if (cursorX == 220 && cursorY == 270) {
+    if (xVal > 555) {
+      cursorY = constrain(cursorY, 270, 270);
+      xmove = 0;
+    }
+    if (yVal > 567) {
+      ymove = 2;
+    } else if (yVal < 467) {
+      ymove = 0;
+    }
+    if (xVal < 455) {
+      cursorY = constrain(cursorY, 270, 270);
+      xmove = -2;
+      ymove = 0;
+    }
+  }
+  // inter 6
+    if (cursorX == 20 && cursorY == 300) {
+      if (xVal > 555) {
+        cursorY = constrain(cursorY, 300, 300);
+        xmove = 2;
+        ymove = 0;
+      }
+      if (yVal > 567) {
+        ymove = 0;
+      } else if (yVal < 467) {
+        ymove = -2;
+      }
+      if (xVal < 455) {
+        xmove=0;
+      }
+    }
+  // inter 6
+    if (cursorX == 220 && cursorY == 300) {
+      if (xVal > 555) {
+        xmove = 0;
+      }
+      if (yVal > 567) {
+        ymove = 0;
+      } else if (yVal < 467) {
+        ymove = -2;
+      }
+      if (xVal < 455) {
+        cursorY = constrain(cursorY, 300, 300);
+        xmove = -2;
+        ymove = 0;
+      }
+    }
+// inter 6 NOT WORKING
+      if (cursorX == 90 && cursorY == 240) {
+        if (xVal > 555) {
+          cursorY = constrain(cursorY, 240,240);
+          ymove = 0;
+          xmove = 2;
+        } else if (xVal < 455) {
+          cursorY = constrain(cursorY, 240,240);
+          ymove = 0;
+          xmove = -2;
+        }
+        if (yVal > 567) {
+          cursorX = constrain(cursorX, 90, 90);
+          xmove = 0;
+          ymove = 2;
+      }
+  }
+  else if (cursorX == 150 && cursorY == 240) {
+    if (xVal > 555) {
+      cursorY = constrain(cursorY, 240,240);
+      ymove = 0;
+      xmove = 2;
+    } else if (xVal < 455) {
+      cursorY = constrain(cursorY, 240,240);
+      ymove = 0;
+      xmove = -2;
+    }
+    if (yVal > 567) {
+      cursorX = constrain(cursorX, 150, 150);
+      xmove = 0;
+      ymove = 2;
+  }
+}
+
+if (cursorX == 90 && cursorY == 270) {
+  if (xVal > 555) {
+    cursorY = constrain(cursorY, 270,270);
+    ymove = 0;
+    xmove = 2;
+  } else if (xVal < 455) {
+    ymove =0;
+    xmove = 0;
+  }
+  if (yVal > 567) {
+    ymove = 0;
+    xmove =0;
+  } else if (yVal < 467) {
+    ymove = -2;
+    xmove = 0;
+  }
+}
+
+if (cursorX == 150 && cursorY == 270) {
+  if (xVal < 455) {
+    cursorY = constrain(cursorY, 270,270);
+    ymove = 0;
+    xmove = -2;
+  } else if (xVal > 555) {
+    ymove =0;
+    xmove = 0;
+  }
+  if (yVal > 567) {
+    ymove = 0;
+    xmove =0;
+  } else if (yVal < 467) {
+    ymove = -2;
+    xmove = 0;
+  }
+}
+
+
+if (cursorX == 110 && cursorY == 270) {
+  if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 110, 110);
+    xmove = 0;
+    ymove = 2;
+  } else if (yVal < 467) {
+    ymove = 0;
+  }
+}
+
+if (cursorX == 130 && cursorY == 270) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 130, 130);
+    xmove = 0;
+    ymove = 2;
+  } else if (yVal < 467) {
+    ymove = 0;
+  }
+}
 
 
 
+if (cursorX == 110 && cursorY == 300) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 110, 110);
+    xmove = 0;
+    ymove  = -2;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+if (cursorX == 130 && cursorY == 300) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 130, 130);
+    xmove = 0;
+    ymove  = -2;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
 
 
 
@@ -518,29 +826,6 @@ if (cursorY < 270 && cursorY > 30) {
 
 
 
-
-/*
-
-void touchedghost() {
-  if (ghost1.xcoord == pacman.xcoord && ghost1.ycoord == pacman.ycoord
-  || ghost1.xcoord - 5 == pacman.xcoord
-  || ghost1.ycoord + 5 == pacman.ycoord || ghost1.xcoord - 5 == pacman.ycoord)
-  could try to do a range becuase of the possible not-perfectly narrow paths
-}
-
-
-*/
-
-
-
-
-// function to calculate manhatten distance
-// WE'LL NEED LATER TO DO DIJKSTRA FOR GHOST
-int manhatten(int currentx, int restx, int currenty, int resty){
-  int distance;
-  distance = abs(currentx - restx) + abs(currenty - resty);
-  return distance;
-}
 
 
 
