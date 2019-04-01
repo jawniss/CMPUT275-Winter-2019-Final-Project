@@ -131,6 +131,7 @@ int screenmidX = DISPLAY_WIDTH/2;
 int screenmidY = DISPLAY_HEIGHT/2;
 
 int score;
+#define PAC_SPEED 2
 #define GHOST_SPEED 1
 #define TOUCH_SIZE 7
 
@@ -729,19 +730,19 @@ void movement() {
   }
   // // For pacman we don't want to have variable speed movement
   if (yVal > 567) {
-    ymove = 2;
+    ymove = PAC_SPEED;
   }
   else if (yVal < 467) {
-    ymove = -2;
+    ymove = -PAC_SPEED;
   }
   else {
     ymove = 0;
   }
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
   }
   else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
   }
   else {
     xmove = 0;
@@ -846,18 +847,6 @@ if (cursorY == 160) {
     cursorX = constrain(cursorX, 150, 240);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -993,32 +982,13 @@ if (cursorY < 160 && cursorY > 130) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //INTERSECTIONS
 // inter 1 ***************
   if (cursorX == 60 && cursorY == 240) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 240, 240);
-      xmove = 2;
-      ymove =0;
+      xmove = PAC_SPEED;
+      ymove = 0;
     }
     if (yVal > 567 || yVal < 467) {
       cursorX = constrain(cursorX, 60, 60);
@@ -1038,7 +1008,7 @@ if (cursorY < 160 && cursorY > 130) {
         xmove = 0;
       }
       if (xVal < 455) {
-        xmove = -2;
+        xmove = -PAC_SPEED;
         ymove = 0;
       }
     }
@@ -1054,7 +1024,7 @@ if (cursorY < 160 && cursorY > 130) {
       }
       if (xVal < 455) {
         cursorY = constrain(cursorY, 270, 270);
-        xmove = -2;
+        xmove = -PAC_SPEED;
         ymove = 0;
       }
     }
@@ -1062,7 +1032,7 @@ if (cursorY < 160 && cursorY > 130) {
     if (cursorX == 180 && cursorY == 270) {
       if (xVal > 555) {
         cursorY = constrain(cursorY, 270, 270);
-        xmove = 2;
+        xmove = PAC_SPEED;
         ymove = 0;
       }
       if (yVal > 567) {
@@ -1077,11 +1047,11 @@ if (cursorY < 160 && cursorY > 130) {
     if (cursorX == 20 && cursorY == 270) {
       if (xVal > 555) {
         cursorY = constrain(cursorY, 270, 270);
-        xmove = 2;
+        xmove = PAC_SPEED;
         ymove = 0;
       }
       if (yVal > 567) {
-        ymove = 2;
+        ymove = PAC_SPEED;
       } else if (yVal < 467) {
         ymove = 0;
       }
@@ -1096,13 +1066,13 @@ if (cursorY < 160 && cursorY > 130) {
       xmove = 0;
     }
     if (yVal > 567) {
-      ymove = 2;
+      ymove = PAC_SPEED;
     } else if (yVal < 467) {
       ymove = 0;
     }
     if (xVal < 455) {
       cursorY = constrain(cursorY, 270, 270);
-      xmove = -2;
+      xmove = -PAC_SPEED;
       ymove = 0;
     }
   }
@@ -1110,13 +1080,13 @@ if (cursorY < 160 && cursorY > 130) {
     if (cursorX == 20 && cursorY == 300) {
       if (xVal > 555) {
         cursorY = constrain(cursorY, 300, 300);
-        xmove = 2;
+        xmove = PAC_SPEED;
         ymove = 0;
       }
       if (yVal > 567) {
         ymove = 0;
       } else if (yVal < 467) {
-        ymove = -2;
+        ymove = -PAC_SPEED;
       }
       if (xVal < 455) {
         xmove=0;
@@ -1130,11 +1100,11 @@ if (cursorY < 160 && cursorY > 130) {
       if (yVal > 567) {
         ymove = 0;
       } else if (yVal < 467) {
-        ymove = -2;
+        ymove = -PAC_SPEED;
       }
       if (xVal < 455) {
         cursorY = constrain(cursorY, 300, 300);
-        xmove = -2;
+        xmove = -PAC_SPEED;
         ymove = 0;
       }
     }
@@ -1143,32 +1113,32 @@ if (cursorY < 160 && cursorY > 130) {
         if (xVal > 555) {
           cursorY = constrain(cursorY, 240,240);
           ymove = 0;
-          xmove = 2;
+          xmove = PAC_SPEED;
         } else if (xVal < 455) {
           cursorY = constrain(cursorY, 240,240);
           ymove = 0;
-          xmove = -2;
+          xmove = -PAC_SPEED;
         }
         if (yVal > 567) {
           cursorX = constrain(cursorX, 90, 90);
           xmove = 0;
-          ymove = 2;
+          ymove = PAC_SPEED;
       }
   }
   else if (cursorX == 150 && cursorY == 240) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 240,240);
       ymove = 0;
-      xmove = 2;
+      xmove = PAC_SPEED;
     } else if (xVal < 455) {
       cursorY = constrain(cursorY, 240,240);
       ymove = 0;
-      xmove = -2;
+      xmove = -PAC_SPEED;
     }
     if (yVal > 567) {
       cursorX = constrain(cursorX, 150, 150);
       xmove = 0;
-      ymove = 2;
+      ymove = PAC_SPEED;
   }
 }
 
@@ -1176,7 +1146,7 @@ if (cursorX == 90 && cursorY == 270) {
   if (xVal > 555) {
     cursorY = constrain(cursorY, 270,270);
     ymove = 0;
-    xmove = 2;
+    xmove = PAC_SPEED;
   } else if (xVal < 455) {
     ymove =0;
     xmove = 0;
@@ -1185,7 +1155,7 @@ if (cursorX == 90 && cursorY == 270) {
     ymove = 0;
     xmove =0;
   } else if (yVal < 467) {
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
   }
 }
@@ -1194,7 +1164,7 @@ if (cursorX == 150 && cursorY == 270) {
   if (xVal < 455) {
     cursorY = constrain(cursorY, 270,270);
     ymove = 0;
-    xmove = -2;
+    xmove = -PAC_SPEED;
   } else if (xVal > 555) {
     ymove =0;
     xmove = 0;
@@ -1203,7 +1173,7 @@ if (cursorX == 150 && cursorY == 270) {
     ymove = 0;
     xmove =0;
   } else if (yVal < 467) {
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
   }
 }
@@ -1211,7 +1181,7 @@ if (cursorX == 150 && cursorY == 270) {
 
 if (cursorX == 110 && cursorY == 270) {
   if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
     xmove = 0;
@@ -1220,7 +1190,7 @@ if (cursorX == 110 && cursorY == 270) {
   if (yVal > 567) {
     cursorX = constrain(cursorX, 110, 110);
     xmove = 0;
-    ymove = 2;
+    ymove = PAC_SPEED;
   } else if (yVal < 467) {
     ymove = 0;
   }
@@ -1228,7 +1198,7 @@ if (cursorX == 110 && cursorY == 270) {
 
 if (cursorX == 130 && cursorY == 270) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1237,7 +1207,7 @@ if (cursorX == 130 && cursorY == 270) {
   if (yVal > 567) {
     cursorX = constrain(cursorX, 130, 130);
     xmove = 0;
-    ymove = 2;
+    ymove = PAC_SPEED;
   } else if (yVal < 467) {
     ymove = 0;
   }
@@ -1247,32 +1217,32 @@ if (cursorX == 130 && cursorY == 270) {
 
 if (cursorX == 110 && cursorY == 300) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 110, 110);
     xmove = 0;
-    ymove  = -2;
+    ymove = -PAC_SPEED;
   } else if (yVal > 567) {
     ymove = 0;
   }
 }
 if (cursorX == 130 && cursorY == 300) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 130, 130);
     xmove = 0;
-    ymove  = -2;
+    ymove = -PAC_SPEED;
   } else if (yVal > 567) {
     ymove = 0;
   }
@@ -1281,32 +1251,32 @@ if (cursorX == 130 && cursorY == 300) {
 
 if (cursorX == 40 && cursorY == 270) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 40, 40);
     xmove = 0;
-    ymove  = -2;
+    ymove = -PAC_SPEED;
   } else if (yVal > 567) {
     ymove = 0;
   }
 }
 if (cursorX == 200 && cursorY == 270) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 200, 200);
     xmove = 0;
-    ymove  = -2;
+    ymove = -PAC_SPEED;
   } else if (yVal > 567) {
     ymove = 0;
   }
@@ -1317,7 +1287,7 @@ if (cursorX == 40 && cursorY == 240) {
     xmove = 0;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
@@ -1325,12 +1295,12 @@ if (cursorX == 40 && cursorY == 240) {
   } else if (yVal > 567) {
     cursorX = constrain(cursorX, 40, 40);
     xmove = 0;
-    ymove  = 2;
+    ymove = PAC_SPEED;
   }
 }
 if (cursorX == 200 && cursorY == 240) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1341,14 +1311,14 @@ if (cursorX == 200 && cursorY == 240) {
   } else if (yVal > 567) {
     cursorX = constrain(cursorX, 200, 200);
     xmove = 0;
-    ymove  = 2;
+    ymove = PAC_SPEED;
   }
 }
 
 
 if (cursorX == 20 && cursorY == 240) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1356,7 +1326,7 @@ if (cursorX == 20 && cursorY == 240) {
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 20, 20);
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
   } else if (yVal > 567) {
     ymove = 0;
@@ -1364,7 +1334,7 @@ if (cursorX == 20 && cursorY == 240) {
 }
 if (cursorX == 220 && cursorY == 240) {
   if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
     xmove = 0;
@@ -1372,7 +1342,7 @@ if (cursorX == 220 && cursorY == 240) {
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 220, 220);
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
   } else if (yVal > 567) {
     ymove = 0;
@@ -1382,7 +1352,7 @@ if (cursorX == 220 && cursorY == 240) {
 
 if (cursorX == 20 && cursorY == 210) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1390,7 +1360,7 @@ if (cursorX == 20 && cursorY == 210) {
   }
   if (yVal > 567) {
     cursorX = constrain(cursorX, 20, 20);
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
   } else if (yVal < 467) {
     ymove = 0;
@@ -1398,7 +1368,7 @@ if (cursorX == 20 && cursorY == 210) {
 }
 if (cursorX == 220 && cursorY == 210) {
   if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
     xmove = 0;
@@ -1406,7 +1376,7 @@ if (cursorX == 220 && cursorY == 210) {
   }
   if (yVal > 567) {
     cursorX = constrain(cursorX, 220, 220);
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
   } else if (yVal < 467) {
     ymove = 0;
@@ -1416,15 +1386,15 @@ if (cursorX == 220 && cursorY == 210) {
 
 if (cursorX == 110 && cursorY == 240) {
   if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 110, 110);
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
   } else if (yVal > 567) {
     ymove = 0;
@@ -1433,15 +1403,15 @@ if (cursorX == 110 && cursorY == 240) {
 
 if (cursorX == 130 && cursorY == 240) {
   if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   }
   if (yVal < 467) {
     cursorX = constrain(cursorX, 130, 130);
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
   } else if (yVal > 567) {
     ymove = 0;
@@ -1450,7 +1420,7 @@ if (cursorX == 130 && cursorY == 240) {
 
 if (cursorX == 110 && cursorY == 210) {
   if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
     xmove = 0;
@@ -1458,7 +1428,7 @@ if (cursorX == 110 && cursorY == 210) {
   }
   if (yVal > 567) {
     cursorX = constrain(cursorX, 110, 110);
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
   } else if (yVal < 467) {
     ymove = 0;
@@ -1466,7 +1436,7 @@ if (cursorX == 110 && cursorY == 210) {
 }
 if (cursorX == 130 && cursorY == 210) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1474,7 +1444,7 @@ if (cursorX == 130 && cursorY == 210) {
   }
   if (yVal > 567) {
     cursorX = constrain(cursorX, 130, 130);
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
   } else if (yVal < 467) {
     ymove = 0;
@@ -1487,21 +1457,21 @@ if (cursorX == 130 && cursorY == 210) {
 if (cursorX == 60 && cursorY == 210) {
   if (xVal > 555) {
     cursorY = constrain(cursorY, 210, 210);
-    xmove = 2;
-    ymove =0;
+    xmove = PAC_SPEED;
+    ymove = 0;
   }
   if (xVal < 455) {
     cursorY = constrain(cursorY, 210, 210);
-    xmove = -2;
-    ymove =0;
+    xmove = -PAC_SPEED;
+    ymove = 0;
   }
   if (yVal > 567) {
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
     cursorX = constrain(cursorX, 60, 60);
   }
   if (yVal < 467) {
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
     cursorX = constrain(cursorX, 60, 60);
   }
@@ -1509,21 +1479,21 @@ if (cursorX == 60 && cursorY == 210) {
 if (cursorX == 180 && cursorY == 210) {
   if (xVal > 555) {
     cursorY = constrain(cursorY, 210, 210);
-    xmove = 2;
-    ymove =0;
+    xmove = PAC_SPEED;
+    ymove = 0;
   }
   if (xVal < 455) {
     cursorY = constrain(cursorY, 210, 210);
-    xmove = -2;
-    ymove =0;
+    xmove = -PAC_SPEED;
+    ymove = 0;
   }
   if (yVal > 567) {
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
     cursorX = constrain(cursorX, 180, 180);
   }
   if (yVal < 467) {
-    ymove = -2;
+    ymove = -PAC_SPEED;
     xmove = 0;
     cursorX = constrain(cursorX, 180, 180);
   }
@@ -1533,10 +1503,10 @@ if (cursorX == 180 && cursorY == 210) {
 
 if (cursorX == 90 && cursorY == 210) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal > 567) {
@@ -1545,16 +1515,16 @@ if (cursorX == 90 && cursorY == 210) {
   } else if (yVal < 467) {
     cursorX = constrain(cursorX, 90, 90);
     xmove = 0;
-    ymove = -2;
+    ymove = -PAC_SPEED;
   }
 }
 
 if (cursorX == 150 && cursorY == 210) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal > 567) {
@@ -1562,7 +1532,7 @@ if (cursorX == 150 && cursorY == 210) {
   } else if (yVal < 467) {
     cursorX = constrain(cursorX, 150, 150);
     xmove = 0;
-    ymove = -2;
+    ymove = -PAC_SPEED;
   }
 }
 
@@ -1571,7 +1541,7 @@ if (cursorX == 150 && cursorY == 210) {
 if (cursorX == 90 && cursorY == 186) {
   if (xVal > 555) {
     cursorY = constrain(cursorY, 186, 186);
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   }
   if (xVal < 455) {
@@ -1585,7 +1555,7 @@ if (cursorX == 90 && cursorY == 186) {
 if (cursorX == 150 && cursorY == 186) {
   if (xVal < 455) {
     cursorY = constrain(cursorY, 186, 186);
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
     xmove = 0;
@@ -1599,7 +1569,7 @@ if (cursorX == 150 && cursorY == 186) {
 if (cursorX == 90 && cursorY == 160) {
   if (xVal < 455) {
     cursorY = constrain(cursorY, 160, 160);
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   } else if (xVal > 555) {
     xmove = 0;
@@ -1613,7 +1583,7 @@ if (cursorX == 90 && cursorY == 160) {
 if (cursorX == 150 && cursorY == 160) {
   if (xVal > 555) {
     cursorY = constrain(cursorY, 160, 160);
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1626,44 +1596,44 @@ if (cursorX == 150 && cursorY == 160) {
 
 if (cursorX == 60 && cursorY == 160) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal > 567) {
     cursorX = constrain(cursorX, 60, 60);
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
   } else if (yVal < 467) {
     cursorX = constrain(cursorX, 60, 60);
     xmove = 0;
-    ymove = -2;
+    ymove = -PAC_SPEED;
   }
 }
 if (cursorX == 180 && cursorY == 160) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal > 567) {
     cursorX = constrain(cursorX, 180, 180);
-    ymove = 2;
+    ymove = PAC_SPEED;
     xmove = 0;
   } else if (yVal < 467) {
     cursorX = constrain(cursorX, 180, 180);
     xmove = 0;
-    ymove = -2;
+    ymove = -PAC_SPEED;
   }
 }
 
 if (cursorX == 0 && cursorY == 160) {
   if (xVal > 555) {
-    xmove = 2;
+    xmove = PAC_SPEED;
     ymove = 0;
   } else if (xVal < 455) {
     xmove = 0;
@@ -1684,7 +1654,7 @@ if (cursorX == 240 && cursorY == 160) {
     xmove = 0;
     ymove = 0;
   } else if (xVal < 455) {
-    xmove = -2;
+    xmove = -PAC_SPEED;
     ymove = 0;
   }
   if (yVal > 567) {
@@ -1725,6 +1695,7 @@ if (cursorX == 240 && cursorY == 160) {
   if (ghost == true){
     ghostMovements();
   }
+  travelling();
   delay(10);
 }
 
