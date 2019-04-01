@@ -11,6 +11,13 @@ IS ABOVE, 3 IF ... ETC
 
 
 
+I THINK CAN DO SAME WITH THE PLAYER - COULD PROLLY MAKE INTO A ONE METHOD,
+FOR THE PLAYER MAKE IF XVAL > 555 : variable = 1
+METHOD WOULD BE
+movement(xVAR, yVAR)
+change the If (xVal > 555) to if (xvar == 1)
+
+
 For the score dots, when pacman moves over them they don't get
 redrawn, perfect for this project
   simply make a counter
@@ -247,7 +254,7 @@ ___|             |___
   tft.drawLine(110,110,110,130,ILI9341_YELLOW);
   tft.drawLine(130,110,130,130,ILI9341_YELLOW);
 
-  tft.drawLine(90,185,150,185 ,ILI9341_YELLOW);
+  tft.drawLine(90,186,150,186 ,ILI9341_YELLOW);
 
 }
 
@@ -460,6 +467,71 @@ if (cursorX > 20 && cursorX < 300) {
 
 
 
+if (cursorY == 240) {
+  if (cursorX >20 && cursorX < 40) {
+    ymove = 0;
+    cursorY = constrain(cursorY, 240, 240);
+    cursorX = constrain(cursorX, 20, 40);
+  } else if (cursorX > 200 && cursorX < 240) {
+    ymove = 0;
+    cursorY = constrain(cursorY, 240, 240);
+    cursorX = constrain(cursorX, 200, 240);
+  }
+}
+
+if (cursorY == 210) {
+  if (cursorX >20 && cursorX < 110) {
+
+    cursorY = constrain(cursorY, 210, 210);
+    ymove = 0;
+    cursorX = constrain(cursorX, 20, 110);
+  } else if (cursorX > 130 && cursorX < 220) {
+
+    cursorY = constrain(cursorY, 210, 210);
+    ymove = 0;
+    cursorX = constrain(cursorX, 130, 220);
+  }
+}
+
+if (cursorY == 186) {
+  if (cursorX > 90 && cursorX < 150) {
+    cursorY = constrain(cursorY, 186, 186);
+    ymove = 0;
+    cursorX = constrain(cursorX, 90, 150);
+  }
+}
+
+if (cursorY == 160) {
+  if (cursorX > 0 && cursorX < 90) {
+    cursorY = constrain(cursorY, 160, 160);
+    ymove = 0;
+    cursorX = constrain(cursorX, 0, 90);
+  } else if (cursorX > 150 && cursorX < 240) {
+    cursorY = constrain(cursorY, 160, 160);
+    ymove = 0;
+    cursorX = constrain(cursorX, 150, 240);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -515,6 +587,91 @@ if (cursorY < 300 && cursorY > 270) {
     cursorY = constrain(cursorY, 270, 300);
   }
 }
+if (cursorY < 270 && cursorY > 240) {
+  if (cursorX == 40) {
+    cursorX = constrain(cursorX, 40, 40);
+    xmove = 0;
+    cursorY = constrain(cursorY, 240, 270);
+  } else if (cursorX == 200) {
+    cursorX = constrain(cursorX, 200, 200);
+    xmove = 0;
+    cursorY = constrain(cursorY, 240, 270);
+  }
+}
+
+if (cursorY < 240 && cursorY > 210) {
+  if (cursorX == 20) {
+    cursorX = constrain(cursorX, 20, 20);
+    xmove = 0;
+    cursorY = constrain(cursorY, 210, 240);
+  } else if (cursorX == 220) {
+    cursorX = constrain(cursorX, 220, 220);
+    xmove = 0;
+    cursorY = constrain(cursorY, 210, 240);
+  } else if (cursorX == 110) {
+    cursorX = constrain(cursorX, 110, 110);
+    xmove = 0;
+    cursorY = constrain(cursorY, 210, 240);
+  } else if (cursorX == 130) {
+    cursorX = constrain(cursorX, 130, 130);
+    xmove = 0;
+    cursorY = constrain(cursorY, 210, 240);
+  }
+}
+
+if (cursorY < 210 && cursorY > 186) {
+  if (cursorX == 90) {
+    xmove = 0;
+    cursorX = constrain(cursorX, 90, 90);
+    cursorY = constrain(cursorY, 186, 210);
+  } else if (cursorX == 150) {
+    xmove = 0;
+    cursorX = constrain(cursorX, 150, 150);
+    cursorY = constrain(cursorY, 186, 210);
+  }
+}
+
+if (cursorY < 186 && cursorY > 160) {
+  if (cursorX == 90) {
+    xmove = 0;
+    cursorX = constrain(cursorX, 90, 90);
+    cursorY = constrain(cursorY, 160, 186);
+  } else if (cursorX == 150) {
+    xmove = 0;
+    cursorX = constrain(cursorX, 150, 150);
+    cursorY = constrain(cursorY, 160, 186);
+  }
+}
+
+if (cursorY < 160 && cursorY > 130) {
+  if (cursorX == 90) {
+    xmove = 0;
+    cursorX = constrain(cursorX, 90, 90);
+    cursorY = constrain(cursorY, 130, 160);
+  } else if (cursorX == 150) {
+    xmove = 0;
+    cursorX = constrain(cursorX, 150, 150);
+    cursorY = constrain(cursorY, 130, 160);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -522,7 +679,7 @@ if (cursorY < 300 && cursorY > 270) {
 
 
 //INTERSECTIONS
-// inter 1
+// inter 1 ***************
   if (cursorX == 60 && cursorY == 240) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 240, 240);
@@ -786,6 +943,429 @@ if (cursorX == 130 && cursorY == 300) {
     ymove = 0;
   }
 }
+
+
+if (cursorX == 40 && cursorY == 270) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 40, 40);
+    xmove = 0;
+    ymove  = -2;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+if (cursorX == 200 && cursorY == 270) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 200, 200);
+    xmove = 0;
+    ymove  = -2;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+
+if (cursorX == 40 && cursorY == 240) {
+  if (xVal > 555) {
+    xmove = 0;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    ymove=0;
+  } else if (yVal > 567) {
+    cursorX = constrain(cursorX, 40, 40);
+    xmove = 0;
+    ymove  = 2;
+  }
+}
+if (cursorX == 200 && cursorY == 240) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    ymove=0;
+  } else if (yVal > 567) {
+    cursorX = constrain(cursorX, 200, 200);
+    xmove = 0;
+    ymove  = 2;
+  }
+}
+
+
+if (cursorX == 20 && cursorY == 240) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 20, 20);
+    ymove = -2;
+    xmove = 0;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+if (cursorX == 220 && cursorY == 240) {
+  if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 220, 220);
+    ymove = -2;
+    xmove = 0;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+
+
+if (cursorX == 20 && cursorY == 210) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 20, 20);
+    ymove = 2;
+    xmove = 0;
+  } else if (yVal < 467) {
+    ymove = 0;
+  }
+}
+if (cursorX == 220 && cursorY == 210) {
+  if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 220, 220);
+    ymove = 2;
+    xmove = 0;
+  } else if (yVal < 467) {
+    ymove = 0;
+  }
+}
+
+
+if (cursorX == 110 && cursorY == 240) {
+  if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 110, 110);
+    ymove = -2;
+    xmove = 0;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+
+if (cursorX == 130 && cursorY == 240) {
+  if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  }
+  if (yVal < 467) {
+    cursorX = constrain(cursorX, 130, 130);
+    ymove = -2;
+    xmove = 0;
+  } else if (yVal > 567) {
+    ymove = 0;
+  }
+}
+
+if (cursorX == 110 && cursorY == 210) {
+  if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 110, 110);
+    ymove = 2;
+    xmove = 0;
+  } else if (yVal < 467) {
+    ymove = 0;
+  }
+}
+if (cursorX == 130 && cursorY == 210) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 130, 130);
+    ymove = 2;
+    xmove = 0;
+  } else if (yVal < 467) {
+    ymove = 0;
+  }
+}
+
+
+
+// FOR SOME REASON AT THESE INTERSECTIONS IT HAS A TOUGH TIME GOING LEFT AND RIGHT, BUT IT DOES WORK IF YOU WIGGLE THE STICK
+if (cursorX == 60 && cursorY == 210) {
+  if (xVal > 555) {
+    cursorY = constrain(cursorY, 210, 210);
+    xmove = 2;
+    ymove =0;
+  }
+  if (xVal < 455) {
+    cursorY = constrain(cursorY, 210, 210);
+    xmove = -2;
+    ymove =0;
+  }
+  if (yVal > 567) {
+    ymove = 2;
+    xmove = 0;
+    cursorX = constrain(cursorX, 60, 60);
+  }
+  if (yVal < 467) {
+    ymove = -2;
+    xmove = 0;
+    cursorX = constrain(cursorX, 60, 60);
+  }
+}
+if (cursorX == 180 && cursorY == 210) {
+  if (xVal > 555) {
+    cursorY = constrain(cursorY, 210, 210);
+    xmove = 2;
+    ymove =0;
+  }
+  if (xVal < 455) {
+    cursorY = constrain(cursorY, 210, 210);
+    xmove = -2;
+    ymove =0;
+  }
+  if (yVal > 567) {
+    ymove = 2;
+    xmove = 0;
+    cursorX = constrain(cursorX, 180, 180);
+  }
+  if (yVal < 467) {
+    ymove = -2;
+    xmove = 0;
+    cursorX = constrain(cursorX, 180, 180);
+  }
+}
+
+
+
+if (cursorX == 90 && cursorY == 210) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    ymove = 0;
+    xmove = 0;
+  } else if (yVal < 467) {
+    cursorX = constrain(cursorX, 90, 90);
+    xmove = 0;
+    ymove = -2;
+  }
+}
+
+if (cursorX == 150 && cursorY == 210) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    xmove = 0;
+  } else if (yVal < 467) {
+    cursorX = constrain(cursorX, 150, 150);
+    xmove = 0;
+    ymove = -2;
+  }
+}
+
+
+
+if (cursorX == 90 && cursorY == 186) {
+  if (xVal > 555) {
+    cursorY = constrain(cursorY, 186, 186);
+    xmove = 2;
+    ymove = 0;
+  }
+  if (xVal < 455) {
+    xmove = 0;
+  }
+  if (yVal > 567 || yVal < 467) {
+    cursorX = constrain(cursorX, 90, 90);
+    xmove = 0;
+  }
+}
+if (cursorX == 150 && cursorY == 186) {
+  if (xVal < 455) {
+    cursorY = constrain(cursorY, 186, 186);
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 0;
+  }
+  if (yVal > 567 || yVal < 467) {
+    cursorX = constrain(cursorX, 150, 150);
+    xmove = 0;
+  }
+}
+
+if (cursorX == 90 && cursorY == 160) {
+  if (xVal < 455) {
+    cursorY = constrain(cursorY, 160, 160);
+    xmove = -2;
+    ymove = 0;
+  } else if (xVal > 555) {
+    xmove = 0;
+  }
+  if (yVal > 567 || yVal < 467) {
+    cursorX = constrain(cursorX, 90, 90);
+    xmove = 0;
+  }
+}
+
+if (cursorX == 150 && cursorY == 160) {
+  if (xVal > 555) {
+    cursorY = constrain(cursorY, 160, 160);
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+  }
+  if (yVal > 567 || yVal < 467) {
+    cursorX = constrain(cursorX, 150, 150);
+    xmove = 0;
+  }
+}
+
+if (cursorX == 60 && cursorY == 160) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 60, 60);
+    ymove = 2;
+    xmove = 0;
+  } else if (yVal < 467) {
+    cursorX = constrain(cursorX, 60, 60);
+    xmove = 0;
+    ymove = -2;
+  }
+}
+if (cursorX == 180 && cursorY == 160) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    cursorX = constrain(cursorX, 180, 180);
+    ymove = 2;
+    xmove = 0;
+  } else if (yVal < 467) {
+    cursorX = constrain(cursorX, 180, 180);
+    xmove = 0;
+    ymove = -2;
+  }
+}
+
+if (cursorX == 0 && cursorY == 160) {
+  if (xVal > 555) {
+    xmove = 2;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = 0;
+    cursorX = 240;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    ymove = 0;
+    xmove = 0;
+  } else if (yVal < 467) {
+    xmove = 0;
+    ymove = 0;
+  }
+}
+if (cursorX == 240 && cursorY == 160) {
+  if (xVal > 555) {
+    cursorX = 0;
+    xmove = 0;
+    ymove = 0;
+  } else if (xVal < 455) {
+    xmove = -2;
+    ymove = 0;
+  }
+  if (yVal > 567) {
+    ymove = 0;
+    xmove = 0;
+  } else if (yVal < 467) {
+    xmove = 0;
+    ymove = 0;
+  }
+}
+
+
+
+
+
 
 
 
