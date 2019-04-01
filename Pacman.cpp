@@ -86,6 +86,7 @@ LETS ADD THE "1 UP" FEATURE >> IF SCORE == 100, LIVES++; SCORE = 0;
 #include <SPI.h>
 #include <SD.h>
 #include <TouchScreen.h>
+#include <string.h>
 
 #define TFT_DC 9
 #define TFT_CS 10
@@ -129,8 +130,33 @@ int xmove, ymove;
 int screenmidX = DISPLAY_WIDTH/2;
 int screenmidY = DISPLAY_HEIGHT/2;
 
+int score;
+#define GHOST_SPEED 1
+#define TOUCH_SIZE 7
 
+#define START_RED_X 160
+#define START_RED_Y 200
+#define START_PINK_X 120
+#define START_PINK_Y 200
+#define START_CYAN_X 100
+#define START_CYAN_Y 70
+#define START_ORANGE_X 160
+#define START_ORANGE_Y 100
 
+// make reset positions for the ghosts for each corner but realisticly red doesnt need to go anywhere
+#define CORNER_1_X 20
+#define CORNER_1_Y 30
+#define CORNER_2_X 220
+#define CORNER_2_Y 30
+#define CORNER_3_X 20
+#define CORNER_3_Y 300
+#define CORNER_4_X 220
+#define CORNER_4_Y 300
+
+int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY;
+int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove;
+
+bool ghost = false;
 
 // struct dotsstruct {
 //   int xcoord;
@@ -259,33 +285,76 @@ ___|             |___
 }
 
 
-
 void setup() {
   init();
   Serial.begin(9600);
-
+  Serial.flush(); // get rid of any leftover bits
   pinMode(JOY_SEL, INPUT_PULLUP);
 
   tft.begin();
 
-  tft.fillScreen(ILI9341_BLACK);
-  tft.setRotation(4);
+}
 
-  travelling();
+void menu(){
+  tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
+  tft.setCursor(10,80);
+  tft.setTextSize(4);
+  tft.setTextColor(ILI9341_BLACK, ILI9341_YELLOW);
+  tft.println(" PAC-MAN ");
 
+  tft.fillRect(62-2, 200-1, 19, 18, ILI9341_RED);
+  tft.fillRect(62-1, 200-2, 17, 14, ILI9341_RED);
+  tft.fillRect(62 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(62 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(62 + 3, 200, 4, 4, ILI9341_BLACK);
+  tft.fillRect(62 + 9, 200, 4, 4, ILI9341_BLACK);
+
+  tft.fillRect(92-2, 200-1, 19, 18, ILI9341_CYAN);
+  tft.fillRect(92-1, 200-2, 17, 14, ILI9341_CYAN);
+  tft.fillRect(92 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(92 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(92 + 3, 200, 4, 4, ILI9341_BLACK);
+  tft.fillRect(92 + 9, 200, 4, 4, ILI9341_BLACK);
+
+  tft.fillRect(122-2, 200-1, 19, 18, ILI9341_MAGENTA);
+  tft.fillRect(122-1, 200-2, 17, 14, ILI9341_MAGENTA);
+  tft.fillRect(122 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(122 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(122 + 3, 200, 4, 4, ILI9341_BLACK);
+  tft.fillRect(122 + 9, 200, 4, 4, ILI9341_BLACK);
+
+  tft.fillRect(152-2, 200-1, 19, 18, ILI9341_ORANGE);
+  tft.fillRect(152-1, 200-2, 17, 14, ILI9341_ORANGE);
+  tft.fillRect(152 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(152 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
+  tft.fillRect(152 + 3, 200, 4, 4, ILI9341_BLACK);
+  tft.fillRect(152 + 9, 200, 4, 4, ILI9341_BLACK);
+
+  tft.fillCircle(192, 207, 9, ILI9341_YELLOW);
+
+  tft.setCursor(40,280);
   tft.setTextSize(1);
-  tft.setTextWrap(false);
+  tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
+  tft.println(" PRESS JOYSTICK TO START ! ");
 
-  cursorX = 120;
-  cursorY = 240;
-
-  tft.println("Size: 1");
-  tft.println("");
+  Serial.println(" almost at while");
+  while (true){
+    //processJoystick();
+    int checkButton = digitalRead(JOY_SEL);
+    //Serial.println(checkButton);
+    if (checkButton == LOW){
+      Serial.println("button pressed");
+      break;
+    }
+  }
 }
 
 
 void screenlayout() {
+  tft.fillScreen(ILI9341_BLACK);
   // Pacman starting spot
+  cursorX = 120;
+  cursorY = 240;
   tft.fillCircle(cursorX, cursorY, PACMAN_SIZE, ILI9341_YELLOW);
   // Borders of map
   tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
@@ -298,14 +367,114 @@ void screenlayout() {
 
   // Squares inside borders
 
+  travelling();
+
+  tft.setTextSize(1);
+  tft.setTextWrap(false);
+
+  if (ghost == true){
+    // draw the starting positions of the ghosts
+    rCursorX = START_RED_X;
+    rCursorY = START_RED_Y;
+
+    pCursorX = START_PINK_X;
+    pCursorY = START_PINK_Y;
+
+    cCursorX = START_CYAN_X;
+    cCursorY = START_CYAN_Y;
+
+    oCursorX = START_ORANGE_X;
+    oCursorY = START_ORANGE_Y;
 
 
-  // Score, lives counters
+
+    //tft.fillCircle(cursorX, cursorY, PACMAN_SIZE, ILI9341_YELLOW);
+    //tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 5, ILI9341_BLUE);
+    //tft.fillRect(120,120,50,50,ILI9341_BLUE);
+
+    // draw red ghost
+    tft.fillCircle(rCursorX, rCursorY, GHOST_SIZE, ILI9341_RED);
+
+    // // if we want to make them look like ghosts leave for later
+    // tft.fillRect(rCursorX-2, rCursorY-1, 8, 7, ILI9341_RED);
+    // tft.fillRect(rCursorX-1, rCursorY-2, 6, 3, ILI9341_RED);
+
+    // draw pink ghost
+    tft.fillCircle(pCursorX, pCursorY, GHOST_SIZE, ILI9341_MAGENTA);
+
+    tft.fillCircle(cCursorX, cCursorY, GHOST_SIZE, ILI9341_CYAN);
+
+    tft.fillCircle(oCursorX, oCursorY, GHOST_SIZE, ILI9341_ORANGE);
+  }
+
+// Score, lives counters
   tft.setCursor(0,0);
   tft.setTextSize(1);
 
+  tft.println("Size: 1");
+  tft.println("");
 }
 
+void inputs(char str[], int len) {
+	// user defined function that takes in player name
+  Serial.println("Press the Enter key after inputing name:");
+    int index = 0;
+    while (index < len - 1) {
+        // if something is waiting to be read on Serial0
+        if (Serial.available() > 0) {
+            char name = Serial.read();
+            // did the user press enter?
+            if (name == '\r') {
+                break;
+            } else {
+                Serial.print(name);
+                str[index] = name;
+                index += 1;
+            }
+        }
+    }
+    str[index] = '\0';
+}
+
+String name() {
+  char str[32];
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setRotation(4);
+  tft.setCursor(10,80);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
+  tft.println(" TYPE YOUR NAME ");
+	// function for startup that prompts user to press enter for their name
+	inputs(str, 32);
+  Serial.println();
+  Serial.print("Your Name is: ");
+  String username = String(str);
+  Serial.print(username);
+  Serial.println();
+
+  return username;
+}
+
+String endGame(int points, String name){
+  // output a different screen if you won
+  tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
+  String value = String(points);
+  tft.setCursor(10,80);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
+  tft.print(name);
+  tft.print(" you scored: ");
+  tft.println(value);
+  return value;
+}
+
+void clientCommunication(String name, String score){
+  Serial.flush();
+  Serial.print(name);
+  Serial.print(" ");
+  Serial.print(score);
+  Serial.flush();
+}
 
 
 /*
@@ -344,7 +513,172 @@ void redrawPacman (int newX, int newY, int oldX, int oldY) {
   tft.fillCircle(newX, newY, PACMAN_SIZE, ILI9341_YELLOW);
 }
 
+void redrawRedGhost(int newX, int newY, int oldX, int oldY) {
+  tft.fillCircle(oldX, oldY, GHOST_SIZE, ILI9341_BLACK);
+  tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_RED);
+}
 
+void redrawPinkGhost(int newX, int newY, int oldX, int oldY) {
+  tft.fillCircle(oldX, oldY, GHOST_SIZE, ILI9341_BLACK);
+  tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_MAGENTA);
+}
+
+void redrawCyanGhost(int newX, int newY, int oldX, int oldY) {
+  tft.fillCircle(oldX, oldY, GHOST_SIZE, ILI9341_BLACK);
+  tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_CYAN);
+}
+
+void redrawOrangeGhost(int newX, int newY, int oldX, int oldY) {
+  tft.fillCircle(oldX, oldY, GHOST_SIZE, ILI9341_BLACK);
+  tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_ORANGE);
+}
+
+void redGhostMove(int pacX, int pacY, int ghostX, int ghostY){
+  // move ghost to the left if it is to the right
+  if ((pacX - ghostX) < 0){
+    rXMove = -GHOST_SPEED;
+  }
+  // move ghost to the right if it is to the left
+  else if ((pacX - ghostX) > 0){
+    rXMove = GHOST_SPEED;
+  }
+  if ((pacY - ghostY) < 0){
+    rYMove = -GHOST_SPEED;
+  }
+  else if ((pacY - ghostY) > 0){
+    rYMove = GHOST_SPEED;
+  }
+  rCursorX += rXMove;
+  rCursorY += rYMove;
+}
+
+void pinkGhostMove(int pacX, int pacY, int ghostX, int ghostY){
+  // move ghost to the left if it is to the right
+  if ((pacX - ghostX) < 0){
+    pXMove = -GHOST_SPEED;
+  }
+  // move ghost to the right if it is to the left
+  else if ((pacX - ghostX) > 0){
+    pXMove = GHOST_SPEED;
+  }
+  if ((pacY - ghostY) < 0){
+    pYMove = -GHOST_SPEED;
+  }
+  else if ((pacY - ghostY) > 0){
+    pYMove = GHOST_SPEED;
+  }
+  pCursorX += pXMove;
+  pCursorY += pYMove;
+}
+
+void cyanGhostMove(int pacX, int pacY, int ghostX, int ghostY){
+  // move ghost to the left if it is to the right
+  if ((pacX - ghostX) < 0){
+    cXMove = -GHOST_SPEED;
+  }
+  // move ghost to the right if it is to the left
+  else if ((pacX - ghostX) > 0){
+    cXMove = GHOST_SPEED;
+  }
+  if ((pacY - ghostY) < 0){
+    cYMove = -GHOST_SPEED;
+  }
+  else if ((pacY - ghostY) > 0){
+    cYMove = GHOST_SPEED;
+  }
+  cCursorX += cXMove;
+  cCursorY += cYMove;
+}
+
+void orangeGhostMove(int pacX, int pacY, int ghostX, int ghostY){
+  // move ghost to the left if it is to the right
+  if ((pacX - ghostX) < 0){
+    oXMove = -GHOST_SPEED;
+  }
+  // move ghost to the right if it is to the left
+  else if ((pacX - ghostX) > 0){
+    oXMove = GHOST_SPEED;
+  }
+  if ((pacY - ghostY) < 0){
+    oYMove = -GHOST_SPEED;
+  }
+  else if ((pacY - ghostY) > 0){
+    oYMove = GHOST_SPEED;
+  }
+  oCursorX += oXMove;
+  oCursorY += oYMove;
+}
+
+void ghostMovements(){
+  int oldRedX = rCursorX;
+  int oldRedY = rCursorY;
+
+  int oldPinkX = pCursorX;
+  int oldPinkY = pCursorY;
+
+  int oldCyanX = cCursorX;
+  int oldCyanY = cCursorY;
+
+  int oldOrangeX = oCursorX;
+  int oldOrangeY = oCursorY;
+
+  // maybe have ghosts move at all times when we get paths done
+  redGhostMove(cursorX,cursorY,rCursorX,rCursorY);
+  redrawRedGhost(rCursorX,rCursorY, oldRedX,oldRedY);
+
+  pinkGhostMove(cursorX,cursorY,pCursorX,pCursorY);
+  redrawPinkGhost(pCursorX,pCursorY, oldPinkX,oldPinkY);
+
+  cyanGhostMove(cursorX,cursorY,cCursorX,cCursorY);
+  redrawCyanGhost(cCursorX,cCursorY, oldCyanX,oldCyanY);
+
+  orangeGhostMove(cursorX,cursorY,oCursorX,oCursorY);
+  redrawOrangeGhost(oCursorX,oCursorY, oldOrangeX,oldOrangeY);
+
+  // if red overlaps pink
+  if ((abs(rCursorX - pCursorX) < TOUCH_SIZE) && (abs(rCursorY - pCursorY) < TOUCH_SIZE)){
+    // need this since without recovering up
+    tft.fillCircle(pCursorX,pCursorY, GHOST_SIZE, ILI9341_BLACK);
+    pCursorX = CORNER_1_X;
+    pCursorY = CORNER_1_Y;
+  }
+  // if red overlaps Cyan
+  if ((abs(rCursorX - cCursorX) < TOUCH_SIZE) && (abs(rCursorY - cCursorY) < TOUCH_SIZE)){
+    // need this since without recovering up
+    tft.fillCircle(cCursorX,cCursorY, GHOST_SIZE, ILI9341_BLACK);
+    cCursorX = CORNER_2_X;
+    cCursorY = CORNER_2_Y;
+  }
+  // if red overlaps orange
+  if ((abs(rCursorX - oCursorX) < TOUCH_SIZE) && (abs(rCursorY - oCursorY) < TOUCH_SIZE)){
+    // need this since without recovering up
+    tft.fillCircle(oCursorX,oCursorY, GHOST_SIZE, ILI9341_BLACK);
+    oCursorX = CORNER_3_X;
+    oCursorY = CORNER_3_Y;
+  }
+  // if pink ovelaps cyan
+  if ((abs(pCursorX - cCursorX) < TOUCH_SIZE) && (abs(pCursorY - cCursorY) < TOUCH_SIZE)){
+    // need this since without recovering up
+    tft.fillCircle(cCursorX,cCursorY, GHOST_SIZE, ILI9341_BLACK);
+    cCursorX = CORNER_2_X;
+    cCursorY = CORNER_2_Y;
+  }
+  // if pink overlaps orange
+  if ((abs(pCursorX - oCursorX) < TOUCH_SIZE) && (abs(pCursorY - oCursorY) < TOUCH_SIZE)){
+    // need this since without recovering up
+    tft.fillCircle(oCursorX,oCursorY, GHOST_SIZE, ILI9341_BLACK);
+    oCursorX = CORNER_3_X;
+    oCursorY = CORNER_3_Y;
+  }
+  // if cyan overlaps orange
+  if ((abs(cCursorX - oCursorX) < TOUCH_SIZE) && (abs(cCursorY - oCursorY) < TOUCH_SIZE)){
+    // need this since without recovering up
+    tft.fillCircle(oCursorX,oCursorY, GHOST_SIZE, ILI9341_BLACK);
+    oCursorX = CORNER_3_X;
+    oCursorY = CORNER_3_Y;
+  }
+
+}
 
 
 /*
@@ -1362,13 +1696,6 @@ if (cursorX == 240 && cursorY == 160) {
   }
 }
 
-
-
-
-
-
-
-
   cursorX += xmove;
   cursorY += ymove;
   xmove = 0;
@@ -1395,12 +1722,10 @@ if (cursorX == 240 && cursorY == 160) {
   if (cursorX != oldX || cursorY != oldY) {
     redrawPacman(cursorX, cursorY, oldX, oldY);
   }
+  if (ghost == true){
+    ghostMovements();
+  }
   delay(10);
-
-
-
-
-
 }
 
 
@@ -1411,13 +1736,42 @@ if (cursorX == 240 && cursorY == 160) {
 
 
 int main() {
+  ghost = false;
   setup();
+  // for later
+  //menu();
+  //String username = name();
+  //unsigned long startTime = millis();
   screenlayout();
   // scoreDots();
+  // place holder score
+  //score = 100;
   while (true) {
     movement();
-
+    // unsigned long endTime = millis();
+    // unsigned long delta = endTime-startTime;
+    // // just testing for now
+    // if (delta > 3000){
+    //   break;
+    // }
+    // for later
+    /*
+    int checkButton = digitalRead(JOY_SEL);
+    //Serial.println(checkButton);
+    if (checkButton == LOW){
+      Serial.println("button pressed");
+      break;
+    }
+    */
   }
+  //String strScore = endGame(score, username);
+  // just keep sending it
+  /*
+  while (true){
+    clientCommunication(username, strScore);
+  }
+  Serial.flush();
+  */
   Serial.end();
   return 0;
 }
