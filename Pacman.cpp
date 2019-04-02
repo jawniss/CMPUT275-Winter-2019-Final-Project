@@ -121,6 +121,8 @@ int screenmidX = DISPLAY_WIDTH/2;
 int screenmidY = DISPLAY_HEIGHT/2;
 
 int score;
+int start = 0;
+int beginrewind = 0;
 #define PAC_SPEED 2
 #define GHOST_SPEED 1
 #define TOUCH_SIZE 7
@@ -146,6 +148,9 @@ int score;
 
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove;
+
+int rewind[500][2] = {0};
+int rewindindex = 0;
 
 bool ghost = true;
 
@@ -177,42 +182,20 @@ struct ghoststruct {
 */
 
 void travelling() {
-  // starting line
+
   tft.drawLine(60, 240, 180, 240, ILI9341_WHITE);
-  /*
 
- _____________
-|             |
-
-  */
   tft.drawLine(60, 240, 60, 270, ILI9341_WHITE);
   tft.drawLine(180, 240, 180, 270, ILI9341_WHITE);
-/*
-    _____________
-___|             |___
-*/
+
   tft.drawLine(60, 270, 20, 270, ILI9341_WHITE);
   tft.drawLine(180, 270, 220, 270, ILI9341_WHITE);
-  /*
-      _____________
-  ___|             |___
-  |                   |
-  */
+
   tft.drawLine( 20, 270, 20, 300, ILI9341_WHITE);
   tft.drawLine( 220, 270, 220, 300, ILI9341_WHITE);
-  /*
-      _____________
-  ___|             |___
-  |                   |
-  _____________________
-  */
+
   tft.drawLine( 20, 300, 220, 300, ILI9341_WHITE);
-  /*
-      _____________
-  ___|             |___
-  |                   |
-  _____________________
-  */
+
   tft.drawLine( 90, 240,90, 270, ILI9341_WHITE);
   tft.drawLine( 150, 240, 150, 270, ILI9341_WHITE);
 
@@ -2293,7 +2276,52 @@ if (cursorX == 130 && cursorY == 30) {
 
 
 
+void recording() {
+  int rewindX, rewindY, oldreX, oldreY;
+  int recordingpressed = digitalRead(JOY_SEL);
+  int countdown = 5;
+  if (start == 1 && rewindindex < 500) {
+    Serial.print("RECRDOINGIGN");
+    rewind[rewindindex][0] = cursorX;
+    rewind[rewindindex][1] = cursorY;
+    rewindindex++;
+  }
+  if (start == 0 && recordingpressed == LOW) {
+    Serial.println("Recording");
+    start = 1;
+    delay(500);
+  } else if (start == 1 && recordingpressed == LOW || rewindindex == 499) {
+    Serial.println("Done recording");
+    start = 0;
+    beginrewind = 1;
+    while (countdown != 0) {
+      Serial.print("Starting rewind in ");
+      Serial.print(countdown);
+      Serial.println(" seconds ...");
+      countdown--;
+      delay(1000);
+    }
+    for (int e = rewindindex; e >= 0; e--) {
+      Serial.print(rewind[e][0]);
+      Serial.println(rewind[e][1]);
+      oldreX = rewindX;
+      oldreY = rewindY;
+      rewindX = rewind[e][0];
+      rewindY = rewind[e][1];
+      if (rewindX != oldreX || rewindY != oldreY) {
+        redrawPacman(rewindX, rewindY, oldreX, oldreY);
+      }
+      travelling();
+      delay(50);
+    }
+    rewindindex = 0;
+    cursorX = rewind[0][0];
+    cursorY = rewind[0][1];
 
+    Serial.println("DONE");
+    delay(500);
+  }
+}
 
 
 
@@ -2310,6 +2338,7 @@ int main() {
   //score = 100;
   while (true) {
     movement();
+    recording();
     // unsigned long endTime = millis();
     // unsigned long delta = endTime-startTime;
     // // just testing for now
@@ -2325,6 +2354,7 @@ int main() {
       break;
     }
     */
+
   }
   //String strScore = endGame(score, username);
   // just keep sending it
