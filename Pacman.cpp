@@ -2002,7 +2002,7 @@ if (cursorX == 220 && cursorY == 70) {
     xmove = -PAC_SPEED;
     ymove = 0;
   }
-  if (xVal < 455) {
+  if (xVal > 555) {
     xmove = 0;
   }
   if (yVal > 567 || yVal < 467) {
