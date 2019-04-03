@@ -2415,14 +2415,14 @@ void recording() {
     oCursorX = rewind[0][8];
     oCursorY = rewind[0][9];
     wCursorX = rewind[0][10];
-    // tft.fillRect(0, 20, DISPLAY_HEIGHT - 20, DISPLAY_WIDTH - 30, ILI9341_RED);
-    // redrawPacman(rewindX, rewindY, rewindX, rewindY);
-    // redrawRedGhost(REDrewindX, REDrewindY, REDrewindX, REDrewindY);
-    // redrawPinkGhost(PINKrewindX, PINKrewindY, PINKrewindX, PINKrewindY);
-    // redrawCyanGhost(CYANrewindX, CYANrewindY, CYANrewindX, CYANrewindY);
-    // redrawOrangeGhost(ORANGErewindX, ORANGErewindY, ORANGErewindX, ORANGErewindY);
-    // redrawWhiteGhost(WHITErewindX, 160, WHITErewindX, 160);
-    // travelling();
+    tft.fillRect(0, 20, DISPLAY_HEIGHT, DISPLAY_WIDTH - 30, ILI9341_BLACK);
+    redrawPacman(rewindX, rewindY, rewindX, rewindY);
+    redrawRedGhost(REDrewindX, REDrewindY, REDrewindX, REDrewindY);
+    redrawPinkGhost(PINKrewindX, PINKrewindY, PINKrewindX, PINKrewindY);
+    redrawCyanGhost(CYANrewindX, CYANrewindY, CYANrewindX, CYANrewindY);
+    redrawOrangeGhost(ORANGErewindX, ORANGErewindY, ORANGErewindX, ORANGErewindY);
+    redrawWhiteGhost(WHITErewindX, 160, WHITErewindX, 160);
+    travelling();
     Serial.println("DONE");
     delay(500);
   }
