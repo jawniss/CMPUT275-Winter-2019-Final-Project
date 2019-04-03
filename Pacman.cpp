@@ -133,14 +133,6 @@ int screenmidX = DISPLAY_WIDTH/2;
 int screenmidY = DISPLAY_HEIGHT/2;
 
 unsigned long score;
-int start = 0;
-int beginrewind = 0;
-#define EASY_LIVES 7
-#define MEDIUM_LIVES 5
-#define HARD_LIVES 3
-
-int life;
-
 #define PAC_SPEED 5
 #define GHOST_SPEED 1
 #define TOUCH_SIZE 7
@@ -167,36 +159,54 @@ int life;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove;
 
-int rewind[200][10] = {0};
-int rewindindex = 0;
-
 bool ghost = true;
 
 #define MAX_SCORES 100
 struct Rankings{
   String names;
-  unsigned int points;
+  int points;
 };
 Rankings playerRecord[MAX_SCORES];
 
 int numberOfScores = 100;
 int numCounter = 0;
-
 void travelling() {
-
+  // starting line
   tft.drawLine(60, 240, 180, 240, ILI9341_WHITE);
+  /*
 
+ _____________
+ |             |
+
+  */
   tft.drawLine(60, 240, 60, 270, ILI9341_WHITE);
   tft.drawLine(180, 240, 180, 270, ILI9341_WHITE);
-
+  /*
+        _____________
+    ___|             |___
+    */
   tft.drawLine(60, 270, 20, 270, ILI9341_WHITE);
   tft.drawLine(180, 270, 220, 270, ILI9341_WHITE);
-
+  /*
+      _____________
+  ___|             |___
+  |                   |
+  */
   tft.drawLine( 20, 270, 20, 300, ILI9341_WHITE);
   tft.drawLine( 220, 270, 220, 300, ILI9341_WHITE);
-
+  /*
+      _____________
+  ___|             |___
+  |                   |
+  _____________________
+  */
   tft.drawLine( 20, 300, 220, 300, ILI9341_WHITE);
-
+  /*
+      _____________
+  ___|             |___
+  |                   |
+  _____________________
+  */
   tft.drawLine( 90, 240,90, 270, ILI9341_WHITE);
   tft.drawLine( 150, 240, 150, 270, ILI9341_WHITE);
 
@@ -381,12 +391,59 @@ void screenlayout() {
 
     tft.fillCircle(oCursorX, oCursorY, GHOST_SIZE, ILI9341_ORANGE);
   }
+
+  // Score, lives counters
+  tft.setCursor(0,0);
+  tft.setTextSize(1);
+
+  tft.println("Size: 1");
+  tft.println("");
 }
 
-String endGame(int pointScore){
+void inputs(char str[], int len) {
+	// user defined function that takes in player name
+  Serial.println("Press the Enter key after inputing name:");
+    int index = 0;
+    while (index < len - 1) {
+        // if something is waiting to be read on Serial0
+        if (Serial.available() > 0) {
+            char name = Serial.read();
+            // did the user press enter?
+            if (name == '\r') {
+                break;
+            } else {
+                Serial.print(name);
+                str[index] = name;
+                index += 1;
+            }
+        }
+    }
+    str[index] = '\0';
+}
+
+String name() {
+  char str[32];
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setRotation(4);
+  tft.setCursor(10,80);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
+  tft.println(" TYPE YOUR NAME ");
+	// function for startup that prompts user to press enter for their name
+	inputs(str, 32);
+  Serial.println();
+  Serial.print("Your Name is: ");
+  String username = String(str);
+  Serial.print(username);
+  Serial.println();
+
+  return username;
+}
+
+String endGame(int points){
   // output a different screen if you won
   tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
-  String value = String(pointScore);
+  String value = String(points);
   tft.setCursor(10,80);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
@@ -466,25 +523,6 @@ void clientCommunication(String score){
   }
 }
 
-void checkTouch(int pacX, int pacY, int ghostX, int ghostY){
-  if ((abs(pacX - ghostX) < TOUCH_SIZE) && (abs(pacY - ghostY) < TOUCH_SIZE)){
-    life = life - 1;
-    Serial.println("hit");
-    // delay so you don't die instantly
-    delay(200);
-  }
-}
-
-void livesDisplay(){
-  String strLife = String(life);
-  // Score, lives counters
-  tft.setCursor(0,0);
-  tft.setTextSize(1);
-
-  tft.print("  Lives: ");
-  tft.print(life);
-
-}
 
 void redrawPacman (int newX, int newY, int oldX, int oldY) {
   tft.fillCircle(oldX, oldY, PACMAN_SIZE, ILI9341_BLACK);
@@ -603,19 +641,15 @@ void ghostMovements(){
   // maybe have ghosts move at all times when we get paths done
   redGhostMove(cursorX,cursorY,rCursorX,rCursorY);
   redrawRedGhost(rCursorX,rCursorY, oldRedX,oldRedY);
-  checkTouch(cursorX,cursorY,rCursorX,rCursorY);
 
   pinkGhostMove(cursorX,cursorY,pCursorX,pCursorY);
   redrawPinkGhost(pCursorX,pCursorY, oldPinkX,oldPinkY);
-  checkTouch(cursorX,cursorY,pCursorX,pCursorY);
 
   cyanGhostMove(cursorX,cursorY,cCursorX,cCursorY);
   redrawCyanGhost(cCursorX,cCursorY, oldCyanX,oldCyanY);
-  checkTouch(cursorX,cursorY,cCursorX,cCursorY);
 
   orangeGhostMove(cursorX,cursorY,oCursorX,oCursorY);
   redrawOrangeGhost(oCursorX,oCursorY, oldOrangeX,oldOrangeY);
-  checkTouch(cursorX,cursorY,oCursorX,oCursorY);
 
   // if red overlaps pink
   if ((abs(rCursorX - pCursorX) < TOUCH_SIZE) && (abs(rCursorY - pCursorY) < TOUCH_SIZE)){
@@ -661,6 +695,43 @@ void ghostMovements(){
   }
 
 }
+
+
+/*
+void walls(int positionX, int positionY) {
+  // concept of wall barrers is starting here, working to not be able to
+  // pass from left or right of wall
+
+  if (cursorY >120 && cursorY < 170) {
+    if (cursorX > 0 && cursorX < 170) {
+    cursorX = constrain(cursorX, 0, 120);
+    }
+    // else if (cursorX > 180 && cursorX < DISPLAY_WIDTH - PACMAN_SIZE) {
+      else {
+      cursorX = constrain(cursorX, 180, DISPLAY_WIDTH - PACMAN_SIZE);
+    }
+  }
+
+
+
+  if (cursorY >120 && cursorY < 170) {
+    if (cursorX == 50) {
+      // this doesn't make it follow the x = 50 line cus you set it to 50 once,
+      // it's gonna instantly change with the joystick function
+    cursorX = 50;
+    }
+    // else if (cursorX > 180 && cursorX < DISPLAY_WIDTH - PACMAN_SIZE) {
+    //   else {
+    //   cursorX = constrain(cursorX, 180, DISPLAY_WIDTH - PACMAN_SIZE);
+    // }
+  }
+
+}
+*/
+
+
+
+
 
 void movement() {
   int yVal = analogRead(JOY_HORIZ);
@@ -2248,94 +2319,6 @@ void ghostMovement(){
   delay(10);
 }
 
-void recording() {
-  int rewindX, rewindY, oldreX, oldreY, REDrewindX, REDrewindY, oldreREDX,
-  oldreREDY, PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY,
-  CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY,
-  ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY;
-  int recordingpressed = digitalRead(JOY_SEL);
-  int countdown = 5;
-  int yVal = analogRead(JOY_HORIZ);
-  int xVal = analogRead(JOY_VERT);
-  if (start == 1 && rewindindex < 200 && xVal > 555 ||
-    start == 1 && rewindindex < 200 && xVal < 455 ||
-    start == 1 && rewindindex < 200 && yVal > 567 ||
-    start == 1 && rewindindex < 200 && yVal < 467) {
-    Serial.print("RECORDING");
-    rewind[rewindindex][0] = cursorX;
-    rewind[rewindindex][1] = cursorY;
-    rewind[rewindindex][2] = rCursorX;
-    rewind[rewindindex][3] = rCursorY;
-    rewind[rewindindex][4] = pCursorX;
-    rewind[rewindindex][5] = pCursorY;
-    rewind[rewindindex][6] = cCursorX;
-    rewind[rewindindex][7] = cCursorY;
-    rewind[rewindindex][8] = oCursorX;
-    rewind[rewindindex][9] = oCursorY;
-    rewindindex++;
-  }
-  if (start == 0 && recordingpressed == LOW) {
-    Serial.println("Recording");
-    start = 1;
-    delay(500);
-  } else if (start == 1 && recordingpressed == LOW || rewindindex == 199) {
-    Serial.println("Done recording");
-    start = 0;
-
-    while (countdown != 0) {
-      Serial.print("Starting rewind in ");
-      Serial.print(countdown);
-      Serial.println(" seconds ...");
-      countdown--;
-      delay(1000);
-    }
-    for (int e = rewindindex; e >= 0; e--) {
-      oldreX = rewindX;
-      oldreY = rewindY;
-      oldreREDX = REDrewindX;
-      oldreREDY = REDrewindY;
-      oldrePINKX = PINKrewindX;
-      oldrePINKY = PINKrewindY;
-      oldreCYANX = CYANrewindX;
-      oldreCYANY = CYANrewindY;
-      oldreORANGEX = ORANGErewindX;
-      oldreORANGEY = ORANGErewindY;
-      rewindX = rewind[e][0];
-      rewindY = rewind[e][1];
-      REDrewindX = rewind[e][2];
-      REDrewindY = rewind[e][3];
-      PINKrewindX = rewind[e][4];
-      PINKrewindY = rewind[e][5];
-      CYANrewindX = rewind[e][6];
-      CYANrewindY = rewind[e][7];
-      ORANGErewindX = rewind[e][8];
-      ORANGErewindY = rewind[e][9];
-      if (rewindX != oldreX || rewindY != oldreY) {
-        redrawPacman(rewindX, rewindY, oldreX, oldreY);
-        redrawRedGhost(REDrewindX, REDrewindY, oldreREDX, oldreREDY);
-        redrawPinkGhost(PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY);
-        redrawCyanGhost(CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY);
-        redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
-      }
-      travelling();
-      delay(25);
-    }
-    rewindindex = 0;
-    cursorX = rewind[0][0];
-    cursorY = rewind[0][1];
-    rCursorX = rewind[0][2];
-    rCursorY = rewind[0][3];
-    pCursorX = rewind[0][4];
-    pCursorY = rewind[0][5];
-    cCursorX = rewind[0][6];
-    cCursorY = rewind[0][7];
-    oCursorX = rewind[0][8];
-    oCursorY = rewind[0][9];
-    Serial.println("DONE");
-    delay(500);
-  }
-}
-
 
 void highScoreScreen(int iteration){
   // draw the screen all black first
@@ -2363,22 +2346,27 @@ int main() {
   setup();
   // for later
   menu();
-  life = EASY_LIVES;
+  //String username = name();
   startTime = millis();
   screenlayout();
   // scoreDots();
   // place holder score
   //score = 100;
   while (true) {
-    movement();
     ghostMovement();
-    livesDisplay();
-    recording();
+    movement();
+    // // just testing for now
+    // if (delta > 3000){
+    //   break;
+    // }
+    // for later
+
+    int checkButton = digitalRead(JOY_SEL);
     //Serial.println(checkButton);
-    if (life == 0){
+    if (checkButton == LOW){
       endTime = millis();
       delta = endTime-startTime;
-      Serial.println("You died");
+      Serial.println("button pressed");
       break;
     }
 
