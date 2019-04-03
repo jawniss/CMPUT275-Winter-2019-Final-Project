@@ -19,7 +19,7 @@ bool sendAck = false;
 
 struct Rankings{
   string names;
-  int points;
+  unsigned int points;
 };
 Rankings playerRecord[MAX_SCORES];
 
@@ -137,7 +137,7 @@ the pivot element at its correct position in sorted
 to left of pivot and all greater elements to right
 of pivot */
 int partition (Rankings dist[], int low, int high){
-	int pivot = dist[high].points; // pivot
+	unsigned int pivot = dist[high].points; // pivot
 	int i = (low - 1); // Index of smaller element
 
 	for (int j = low; j <= high- 1; j++)

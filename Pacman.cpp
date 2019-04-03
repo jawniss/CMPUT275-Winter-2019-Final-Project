@@ -133,8 +133,22 @@ int screenmidX = DISPLAY_WIDTH/2;
 int screenmidY = DISPLAY_HEIGHT/2;
 
 unsigned long score;
+int start = 0;
+int beginrewind = 0;
+
+int life;
+int ghostSpeed;
+int bSpeed;
+
+#define EASY_LIVES 7
+#define MEDIUM_LIVES 5
+#define HARD_LIVES 3
+
 #define PAC_SPEED 5
-#define GHOST_SPEED 1
+#define EASY_GHOST_SPEED 1
+#define MEDIUM_GHOST_SPEED 2
+#define EASY_BLACK_SPEED 2
+#define HARD_BLACK_SPEED 5
 #define TOUCH_SIZE 7
 
 #define START_RED_X 160
@@ -145,6 +159,8 @@ unsigned long score;
 #define START_CYAN_Y 70
 #define START_ORANGE_X 160
 #define START_ORANGE_Y 100
+#define START_WHITE_X 0
+#define START_WHITE_Y 160
 
 // make reset positions for the ghosts for each corner but realisticly red doesnt need to go anywhere
 #define CORNER_1_X 20
@@ -156,57 +172,45 @@ unsigned long score;
 #define CORNER_4_X 220
 #define CORNER_4_Y 300
 
-int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY;
-int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove;
+int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
+int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
+
+int rewind[200][10] = {0};
+int rewindindex = 0;
 
 bool ghost = true;
 
 #define MAX_SCORES 100
+
 struct Rankings{
   String names;
-  int points;
+  unsigned int points;
 };
 Rankings playerRecord[MAX_SCORES];
 
+struct DifficultySettings{
+  String diffName;
+};
+DifficultySettings difSet[3];
+
 int numberOfScores = 100;
 int numCounter = 0;
+
 void travelling() {
-  // starting line
+
   tft.drawLine(60, 240, 180, 240, ILI9341_WHITE);
-  /*
 
- _____________
- |             |
-
-  */
   tft.drawLine(60, 240, 60, 270, ILI9341_WHITE);
   tft.drawLine(180, 240, 180, 270, ILI9341_WHITE);
-  /*
-        _____________
-    ___|             |___
-    */
+
   tft.drawLine(60, 270, 20, 270, ILI9341_WHITE);
   tft.drawLine(180, 270, 220, 270, ILI9341_WHITE);
-  /*
-      _____________
-  ___|             |___
-  |                   |
-  */
+
   tft.drawLine( 20, 270, 20, 300, ILI9341_WHITE);
   tft.drawLine( 220, 270, 220, 300, ILI9341_WHITE);
-  /*
-      _____________
-  ___|             |___
-  |                   |
-  _____________________
-  */
+
   tft.drawLine( 20, 300, 220, 300, ILI9341_WHITE);
-  /*
-      _____________
-  ___|             |___
-  |                   |
-  _____________________
-  */
+
   tft.drawLine( 90, 240,90, 270, ILI9341_WHITE);
   tft.drawLine( 150, 240, 150, 270, ILI9341_WHITE);
 
@@ -334,6 +338,111 @@ void menu(){
   }
 }
 
+void settingdiff(){
+  difSet[0].diffName = "EASY";
+  difSet[1].diffName = "MEDIUM";
+  difSet[2].diffName = "HARD";
+
+}
+
+void drawPick(int selected, int previous, bool mode){
+  Serial.println("in drawpick ");
+  tft.setCursor(10, 80);
+  tft.setTextSize(3);
+  if (mode == true) {
+    // if you moved in list mode
+    if (previous != selected) {
+      for (int16_t i = 0; i < 3; i++) {
+        if (i == selected) {
+          tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
+          tft.println(difSet[i].diffName);
+        } else if (i == previous) {
+          // unhighlight
+          tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+          tft.println(difSet[i].diffName);
+        } else {
+          // keep restaurants the same if you didn't move towards it
+          tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+          tft.println("");
+        }
+      }
+    }
+  // case for when you entered the list from map
+  // draw all names that are close
+  } else {
+    for (int i = 0; i < 3; i ++) {
+      if (i == selected) {  // highlight
+        // black characters on white background
+        tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
+      } else {  // not highlighted
+        // white characters on black background
+        tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+      }
+      tft.println(difSet[i].diffName);
+      mode = true;
+    }
+  }
+}
+
+void setGame(int position){
+  // set lives and ghost speeds here
+  #define EASY_GHOST_SPEED 1
+  #define MEDIUM_GHOST_SPEED 2
+  #define EASY_BLACK_SPEED 2
+  #define HARD_BLACK_SPEED 5
+  if (position == 0){
+    life = EASY_LIVES;
+    ghostSpeed = EASY_GHOST_SPEED;
+    bSpeed = EASY_BLACK_SPEED;
+  }else if (position == 1){
+    life = MEDIUM_LIVES;
+    ghostSpeed = MEDIUM_GHOST_SPEED;
+    bSpeed = EASY_BLACK_SPEED;
+  }else if (position == 2){
+    life = HARD_LIVES;
+    ghostSpeed = MEDIUM_GHOST_SPEED;
+    bSpeed = HARD_BLACK_SPEED;
+  }else {
+    Serial.println("should never get here");
+  }
+}
+
+void difficulty(){
+  bool diffSelect = false;
+  bool drawMode = false;
+  int position = 0;
+  int previousPosition = position;
+  tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
+  Serial.println("in diff ");
+  drawPick(position, previousPosition, drawMode);
+  while(diffSelect == false){
+    int yRead = analogRead(JOY_HORIZ);
+    int buttonPush = digitalRead(JOY_SEL);
+    // this is to move down
+    if (yRead >= (JOY_CENTER + JOY_DEADZONE)){
+      position++;
+      if (position > 2){
+        position = 0;
+      }
+      drawPick(position, previousPosition, drawMode);
+      previousPosition = position;
+      // this is move up
+    } else if (yRead <= (JOY_CENTER - JOY_DEADZONE) ){
+      position--;
+      if (position < 0){
+        position = 2;
+      }
+      drawPick(position, previousPosition, drawMode);
+      previousPosition = position;
+    }
+    if (buttonPush == LOW){
+      setGame(position);
+      diffSelect = true;
+    }
+    delay(100);
+  }
+}
+
 
 void screenlayout() {
   tft.fillScreen(ILI9341_BLACK);
@@ -371,11 +480,8 @@ void screenlayout() {
     oCursorX = START_ORANGE_X;
     oCursorY = START_ORANGE_Y;
 
-
-
-    //tft.fillCircle(cursorX, cursorY, PACMAN_SIZE, ILI9341_YELLOW);
-    //tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 5, ILI9341_BLUE);
-    //tft.fillRect(120,120,50,50,ILI9341_BLUE);
+    wCursorX = START_WHITE_X;
+    wCursorY = START_WHITE_Y;
 
     // draw red ghost
     tft.fillCircle(rCursorX, rCursorY, GHOST_SIZE, ILI9341_RED);
@@ -390,60 +496,15 @@ void screenlayout() {
     tft.fillCircle(cCursorX, cCursorY, GHOST_SIZE, ILI9341_CYAN);
 
     tft.fillCircle(oCursorX, oCursorY, GHOST_SIZE, ILI9341_ORANGE);
+
+    tft.fillCircle(wCursorX, wCursorY, GHOST_SIZE, ILI9341_WHITE);
   }
-
-  // Score, lives counters
-  tft.setCursor(0,0);
-  tft.setTextSize(1);
-
-  tft.println("Size: 1");
-  tft.println("");
 }
 
-void inputs(char str[], int len) {
-	// user defined function that takes in player name
-  Serial.println("Press the Enter key after inputing name:");
-    int index = 0;
-    while (index < len - 1) {
-        // if something is waiting to be read on Serial0
-        if (Serial.available() > 0) {
-            char name = Serial.read();
-            // did the user press enter?
-            if (name == '\r') {
-                break;
-            } else {
-                Serial.print(name);
-                str[index] = name;
-                index += 1;
-            }
-        }
-    }
-    str[index] = '\0';
-}
-
-String name() {
-  char str[32];
-  tft.fillScreen(ILI9341_BLACK);
-  tft.setRotation(4);
-  tft.setCursor(10,80);
-  tft.setTextSize(2);
-  tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
-  tft.println(" TYPE YOUR NAME ");
-	// function for startup that prompts user to press enter for their name
-	inputs(str, 32);
-  Serial.println();
-  Serial.print("Your Name is: ");
-  String username = String(str);
-  Serial.print(username);
-  Serial.println();
-
-  return username;
-}
-
-String endGame(int points){
+String endGame(int pointScore){
   // output a different screen if you won
   tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
-  String value = String(points);
+  String value = String(pointScore);
   tft.setCursor(10,80);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
@@ -523,6 +584,25 @@ void clientCommunication(String score){
   }
 }
 
+void checkTouch(int pacX, int pacY, int ghostX, int ghostY){
+  if ((abs(pacX - ghostX) < TOUCH_SIZE) && (abs(pacY - ghostY) < TOUCH_SIZE)){
+    life = life - 1;
+    Serial.println("hit");
+    // delay so you don't die instantly
+    delay(200);
+  }
+}
+
+void livesDisplay(){
+  String strLife = String(life);
+  // Score, lives counters
+  tft.setCursor(0,0);
+  tft.setTextSize(1);
+
+  tft.print("  Lives: ");
+  tft.print(life);
+
+}
 
 void redrawPacman (int newX, int newY, int oldX, int oldY) {
   tft.fillCircle(oldX, oldY, PACMAN_SIZE, ILI9341_BLACK);
@@ -549,20 +629,25 @@ void redrawOrangeGhost(int newX, int newY, int oldX, int oldY) {
   tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_ORANGE);
 }
 
+void redrawWhiteGhost(int newX, int newY, int oldX, int oldY) {
+  tft.fillCircle(oldX, oldY, GHOST_SIZE, ILI9341_BLACK);
+  tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_WHITE);
+}
+
 void redGhostMove(int pacX, int pacY, int ghostX, int ghostY){
   // move ghost to the left if it is to the right
   if ((pacX - ghostX) < 0){
-    rXMove = -GHOST_SPEED;
+    rXMove = -ghostSpeed;
   }
   // move ghost to the right if it is to the left
   else if ((pacX - ghostX) > 0){
-    rXMove = GHOST_SPEED;
+    rXMove = ghostSpeed;
   }
   if ((pacY - ghostY) < 0){
-    rYMove = -GHOST_SPEED;
+    rYMove = -ghostSpeed;
   }
   else if ((pacY - ghostY) > 0){
-    rYMove = GHOST_SPEED;
+    rYMove = ghostSpeed;
   }
   rCursorX += rXMove;
   rCursorY += rYMove;
@@ -571,17 +656,17 @@ void redGhostMove(int pacX, int pacY, int ghostX, int ghostY){
 void pinkGhostMove(int pacX, int pacY, int ghostX, int ghostY){
   // move ghost to the left if it is to the right
   if ((pacX - ghostX) < 0){
-    pXMove = -GHOST_SPEED;
+    pXMove = -ghostSpeed;
   }
   // move ghost to the right if it is to the left
   else if ((pacX - ghostX) > 0){
-    pXMove = GHOST_SPEED;
+    pXMove = ghostSpeed;
   }
   if ((pacY - ghostY) < 0){
-    pYMove = -GHOST_SPEED;
+    pYMove = -ghostSpeed;
   }
   else if ((pacY - ghostY) > 0){
-    pYMove = GHOST_SPEED;
+    pYMove = ghostSpeed;
   }
   pCursorX += pXMove;
   pCursorY += pYMove;
@@ -590,17 +675,17 @@ void pinkGhostMove(int pacX, int pacY, int ghostX, int ghostY){
 void cyanGhostMove(int pacX, int pacY, int ghostX, int ghostY){
   // move ghost to the left if it is to the right
   if ((pacX - ghostX) < 0){
-    cXMove = -GHOST_SPEED;
+    cXMove = -ghostSpeed;
   }
   // move ghost to the right if it is to the left
   else if ((pacX - ghostX) > 0){
-    cXMove = GHOST_SPEED;
+    cXMove = ghostSpeed;
   }
   if ((pacY - ghostY) < 0){
-    cYMove = -GHOST_SPEED;
+    cYMove = -ghostSpeed;
   }
   else if ((pacY - ghostY) > 0){
-    cYMove = GHOST_SPEED;
+    cYMove = ghostSpeed;
   }
   cCursorX += cXMove;
   cCursorY += cYMove;
@@ -609,20 +694,27 @@ void cyanGhostMove(int pacX, int pacY, int ghostX, int ghostY){
 void orangeGhostMove(int pacX, int pacY, int ghostX, int ghostY){
   // move ghost to the left if it is to the right
   if ((pacX - ghostX) < 0){
-    oXMove = -GHOST_SPEED;
+    oXMove = -ghostSpeed;
   }
   // move ghost to the right if it is to the left
   else if ((pacX - ghostX) > 0){
-    oXMove = GHOST_SPEED;
+    oXMove = ghostSpeed;
   }
   if ((pacY - ghostY) < 0){
-    oYMove = -GHOST_SPEED;
+    oYMove = -ghostSpeed;
   }
   else if ((pacY - ghostY) > 0){
-    oYMove = GHOST_SPEED;
+    oYMove = ghostSpeed;
   }
   oCursorX += oXMove;
   oCursorY += oYMove;
+}
+
+void whiteGhostMove(){
+  wCursorX += bSpeed;
+  if (wCursorX > 240){
+    wCursorX = 0;
+  }
 }
 
 void ghostMovements(){
@@ -638,19 +730,31 @@ void ghostMovements(){
   int oldOrangeX = oCursorX;
   int oldOrangeY = oCursorY;
 
+  int oldWhiteX = wCursorX;
+  int oldWhiteY = wCursorY;
+
   // maybe have ghosts move at all times when we get paths done
   redGhostMove(cursorX,cursorY,rCursorX,rCursorY);
   redrawRedGhost(rCursorX,rCursorY, oldRedX,oldRedY);
+  checkTouch(cursorX,cursorY,rCursorX,rCursorY);
 
   pinkGhostMove(cursorX,cursorY,pCursorX,pCursorY);
   redrawPinkGhost(pCursorX,pCursorY, oldPinkX,oldPinkY);
+  checkTouch(cursorX,cursorY,pCursorX,pCursorY);
 
   cyanGhostMove(cursorX,cursorY,cCursorX,cCursorY);
   redrawCyanGhost(cCursorX,cCursorY, oldCyanX,oldCyanY);
+  checkTouch(cursorX,cursorY,cCursorX,cCursorY);
 
   orangeGhostMove(cursorX,cursorY,oCursorX,oCursorY);
   redrawOrangeGhost(oCursorX,oCursorY, oldOrangeX,oldOrangeY);
+  checkTouch(cursorX,cursorY,oCursorX,oCursorY);
 
+  whiteGhostMove();
+  redrawWhiteGhost(wCursorX,wCursorY,oldWhiteX,oldWhiteY);
+  checkTouch(cursorX,cursorY,wCursorX,wCursorY);
+
+  // turn into function if have time
   // if red overlaps pink
   if ((abs(rCursorX - pCursorX) < TOUCH_SIZE) && (abs(rCursorY - pCursorY) < TOUCH_SIZE)){
     // need this since without recovering up
@@ -695,43 +799,6 @@ void ghostMovements(){
   }
 
 }
-
-
-/*
-void walls(int positionX, int positionY) {
-  // concept of wall barrers is starting here, working to not be able to
-  // pass from left or right of wall
-
-  if (cursorY >120 && cursorY < 170) {
-    if (cursorX > 0 && cursorX < 170) {
-    cursorX = constrain(cursorX, 0, 120);
-    }
-    // else if (cursorX > 180 && cursorX < DISPLAY_WIDTH - PACMAN_SIZE) {
-      else {
-      cursorX = constrain(cursorX, 180, DISPLAY_WIDTH - PACMAN_SIZE);
-    }
-  }
-
-
-
-  if (cursorY >120 && cursorY < 170) {
-    if (cursorX == 50) {
-      // this doesn't make it follow the x = 50 line cus you set it to 50 once,
-      // it's gonna instantly change with the joystick function
-    cursorX = 50;
-    }
-    // else if (cursorX > 180 && cursorX < DISPLAY_WIDTH - PACMAN_SIZE) {
-    //   else {
-    //   cursorX = constrain(cursorX, 180, DISPLAY_WIDTH - PACMAN_SIZE);
-    // }
-  }
-
-}
-*/
-
-
-
-
 
 void movement() {
   int yVal = analogRead(JOY_HORIZ);
@@ -2319,6 +2386,94 @@ void ghostMovement(){
   delay(10);
 }
 
+void recording() {
+  int rewindX, rewindY, oldreX, oldreY, REDrewindX, REDrewindY, oldreREDX,
+  oldreREDY, PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY,
+  CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY,
+  ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY;
+  int recordingpressed = digitalRead(JOY_SEL);
+  int countdown = 5;
+  int yVal = analogRead(JOY_HORIZ);
+  int xVal = analogRead(JOY_VERT);
+  if (start == 1 && rewindindex < 200 && xVal > 555 ||
+    start == 1 && rewindindex < 200 && xVal < 455 ||
+    start == 1 && rewindindex < 200 && yVal > 567 ||
+    start == 1 && rewindindex < 200 && yVal < 467) {
+    Serial.print("RECORDING");
+    rewind[rewindindex][0] = cursorX;
+    rewind[rewindindex][1] = cursorY;
+    rewind[rewindindex][2] = rCursorX;
+    rewind[rewindindex][3] = rCursorY;
+    rewind[rewindindex][4] = pCursorX;
+    rewind[rewindindex][5] = pCursorY;
+    rewind[rewindindex][6] = cCursorX;
+    rewind[rewindindex][7] = cCursorY;
+    rewind[rewindindex][8] = oCursorX;
+    rewind[rewindindex][9] = oCursorY;
+    rewindindex++;
+  }
+  if (start == 0 && recordingpressed == LOW) {
+    Serial.println("Recording");
+    start = 1;
+    delay(500);
+  } else if (start == 1 && recordingpressed == LOW || rewindindex == 199) {
+    Serial.println("Done recording");
+    start = 0;
+
+    while (countdown != 0) {
+      Serial.print("Starting rewind in ");
+      Serial.print(countdown);
+      Serial.println(" seconds ...");
+      countdown--;
+      delay(1000);
+    }
+    for (int e = rewindindex; e >= 0; e--) {
+      oldreX = rewindX;
+      oldreY = rewindY;
+      oldreREDX = REDrewindX;
+      oldreREDY = REDrewindY;
+      oldrePINKX = PINKrewindX;
+      oldrePINKY = PINKrewindY;
+      oldreCYANX = CYANrewindX;
+      oldreCYANY = CYANrewindY;
+      oldreORANGEX = ORANGErewindX;
+      oldreORANGEY = ORANGErewindY;
+      rewindX = rewind[e][0];
+      rewindY = rewind[e][1];
+      REDrewindX = rewind[e][2];
+      REDrewindY = rewind[e][3];
+      PINKrewindX = rewind[e][4];
+      PINKrewindY = rewind[e][5];
+      CYANrewindX = rewind[e][6];
+      CYANrewindY = rewind[e][7];
+      ORANGErewindX = rewind[e][8];
+      ORANGErewindY = rewind[e][9];
+      if (rewindX != oldreX || rewindY != oldreY) {
+        redrawPacman(rewindX, rewindY, oldreX, oldreY);
+        redrawRedGhost(REDrewindX, REDrewindY, oldreREDX, oldreREDY);
+        redrawPinkGhost(PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY);
+        redrawCyanGhost(CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY);
+        redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
+      }
+      travelling();
+      delay(25);
+    }
+    rewindindex = 0;
+    cursorX = rewind[0][0];
+    cursorY = rewind[0][1];
+    rCursorX = rewind[0][2];
+    rCursorY = rewind[0][3];
+    pCursorX = rewind[0][4];
+    pCursorY = rewind[0][5];
+    cCursorX = rewind[0][6];
+    cCursorY = rewind[0][7];
+    oCursorX = rewind[0][8];
+    oCursorY = rewind[0][9];
+    Serial.println("DONE");
+    delay(500);
+  }
+}
+
 
 void highScoreScreen(int iteration){
   // draw the screen all black first
@@ -2346,32 +2501,29 @@ int main() {
   setup();
   // for later
   menu();
-  //String username = name();
+  settingdiff();
+  difficulty();
+  //life = EASY_LIVES;
   startTime = millis();
   screenlayout();
   // scoreDots();
   // place holder score
   //score = 100;
   while (true) {
-    ghostMovement();
     movement();
-    // // just testing for now
-    // if (delta > 3000){
-    //   break;
-    // }
-    // for later
-
-    int checkButton = digitalRead(JOY_SEL);
+    ghostMovement();
+    livesDisplay();
+    recording();
     //Serial.println(checkButton);
-    if (checkButton == LOW){
+    if (life == 0){
       endTime = millis();
       delta = endTime-startTime;
-      Serial.println("button pressed");
+      Serial.println("You died");
       break;
     }
 
   }
-  score = delta;
+  score = (delta/1000);
   String strScore = endGame(score);
   // just keep sending it
   Serial.println("after endgame");
