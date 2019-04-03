@@ -16,6 +16,7 @@ using namespace std;
 bool recieveScore = false;
 bool sendRanks = false;
 bool sendAck = false;
+bool newGame = false;
 
 struct Rankings{
   string names;
@@ -213,34 +214,70 @@ void serverCom (unordered_map<int,Rankings>& rank, int counter){
   }
 }
 
+void waiting(){
+  SerialPort Serial("/dev/ttyACM0");
+  string readIn;
+  do {
+    // timeout for readline increased to 10 seconds since it seemed more consistent
+    readIn = Serial.readline(100000);
+    cout << "this is what is read: " << readIn << endl;
+  } while (readIn.find("E") == (string::npos));
+  newGame = true;
+}
+
+template<typename It>
+void mfill(It begin, It end, typename std::remove_reference<decltype(*begin)>::type const &v)
+{
+   std::fill(begin, end, v);
+}
+
 int main(){
   SerialPort Serial("/dev/ttyACM0");
   unordered_map<int,Rankings> rank;
-  string username = inputName();
-  cout << "before read score" << endl;
-  readScores("scores.txt",rank);
-  cout << "before recieving names and score" << endl;
-  counter = serverScore(username , rank, counter);
-  cout << "after recieving stuff" << endl;
-  //sort(playerRecord, playerRecord + counter, sorting);
-  quickSort(playerRecord, 0, counter-1);
-  cout << "sorted " << endl;
-  cout << "counter: " << counter << endl;
-  cout << "before serverCom" << endl;
-  serverCom(rank, counter);
-  if (counter < MAX_SCORES){
-    for (int i = 0; i < (counter-1); i++) {
-      cout << (i+1) << ")  " << playerRecord[i].names << " "<< playerRecord[i].points << endl ;
-      //scoreboard(playerRecord[i]);
-    }
-  }
-  else {
-    for (int i = 0; i < (MAX_SCORES); i++) {
-      cout << (i+1) << ")  " << playerRecord[i].names << " "<< playerRecord[i].points << endl ;
-      //scoreboard(playerRecord[i]);
-    }
-  }
   while (true){
+    newGame = false;
+    recieveScore = false;
+    sendRanks = false;
+    sendAck = false;
+    counter = 0;
+
+    mfill(playerRecord, playerRecord+MAX_SCORES, {});
+
+    string username = inputName();
+    cout << "before read score" << endl;
+    readScores("scores.txt",rank);
+    cout << "before recieving names and score" << endl;
+
+
+
+    counter = serverScore(username , rank, counter);
+
+
+    cout << "after recieving stuff" << endl;
+    //sort(playerRecord, playerRecord + counter, sorting);
+    quickSort(playerRecord, 0, counter-1);
+    cout << "sorted " << endl;
+    cout << "counter: " << counter << endl;
+    cout << "before serverCom" << endl;
+
+
+
+    serverCom(rank, counter);
+    // if (counter < MAX_SCORES){
+    //   for (int i = 0; i < (counter-1); i++) {
+    //     cout << (i+1) << ")  " << playerRecord[i].names << " "<< playerRecord[i].points << endl ;
+    //     //scoreboard(playerRecord[i]);
+    //   }
+    // }
+    // else {
+    //   for (int i = 0; i < (MAX_SCORES); i++) {
+    //     cout << (i+1) << ")  " << playerRecord[i].names << " "<< playerRecord[i].points << endl ;
+    //     //scoreboard(playerRecord[i]);
+    //   }
+    // }
+    while (newGame == false){
+      waiting();
+    }
   }
   cout << "done" << endl;
   return 0;

@@ -126,6 +126,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 bool sendScore = false;
 bool comDone = false;
+bool restart = false;
 
 int cursorX, cursorY;
 int xmove, ymove;
@@ -175,7 +176,7 @@ int bSpeed;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
-int rewind[200][12] = {0};
+int rewind[200][10] = {0};
 int rewindindex = 0;
 
 bool ghost = true;
@@ -339,17 +340,21 @@ void menu(){
 }
 
 void settingdiff(){
-  difSet[0].diffName = "EASY";
-  difSet[1].diffName = "MEDIUM";
-  difSet[2].diffName = "HARD";
+  difSet[0].diffName = " EASY ";
+  difSet[1].diffName = " MEDIUM ";
+  difSet[2].diffName = " HARD ";
 
 }
 
 void drawPick(int selected, int previous, bool mode){
   Serial.println("in drawpick ");
-  tft.setCursor(10, 80);
-  tft.setTextSize(3);
+  tft.setCursor(2, 40);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  tft.println(" Select Diffuculty ");
   if (mode == true) {
+    tft.setCursor(0, 100);
+    tft.setTextSize(3);
     // if you moved in list mode
     if (previous != selected) {
       for (int16_t i = 0; i < 3; i++) {
@@ -370,6 +375,8 @@ void drawPick(int selected, int previous, bool mode){
   // case for when you entered the list from map
   // draw all names that are close
   } else {
+    tft.setCursor(0, 100);
+    tft.setTextSize(3);
     for (int i = 0; i < 3; i ++) {
       if (i == selected) {  // highlight
         // black characters on white background
@@ -386,10 +393,6 @@ void drawPick(int selected, int previous, bool mode){
 
 void setGame(int position){
   // set lives and ghost speeds here
-  #define EASY_GHOST_SPEED 1
-  #define MEDIUM_GHOST_SPEED 2
-  #define EASY_BLACK_SPEED 2
-  #define HARD_BLACK_SPEED 5
   if (position == 0){
     life = EASY_LIVES;
     ghostSpeed = EASY_GHOST_SPEED;
@@ -2491,59 +2494,92 @@ void highScoreScreen(int iteration){
   tft.setCursor(0, 0);
   tft.setTextSize(1);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.println("Rank            Username         Score");
+  tft.print("Rank");
+  tft.setCursor(50, 0);
+  tft.setTextSize(1);
+  tft.print("Username");
+  tft.setCursor(180, 0);
+  tft.setTextSize(1);
+  tft.print("Score");
   for (int i = 0; i < (iteration-1); i++) {
     String strIter = String(i+1);
+    tft.setCursor(0, (i+1)*8);
+    tft.setTextSize(1);
     tft.print(strIter);
-    tft.print("           ");
+    //tft.print("           ");
+    tft.setCursor(50, (i+1)*8);
+    tft.setTextSize(1);
     tft.print(playerRecord[i].names);
-    tft.print("           ");
+    //tft.print("           ");
+    tft.setCursor(180, (i+1)*8);
+    tft.setTextSize(1);
     String strPScore = String(playerRecord[i].points);
     tft.println(strPScore);
+
+    Serial.print("name: ");
+    Serial.print(playerRecord[i].names);
+    Serial.print(" score: ");
+    Serial.println(strPScore);
   }
 }
 
+void checkReset(){
+  int buttonPush = digitalRead(JOY_SEL);
+  if (buttonPush == LOW){
+    Serial.println("E");
+    Serial.flush();
+    restart = true;
+  }
+}
 
 
 int main() {
   unsigned long startTime, endTime;
   unsigned long delta = 0;
-  setup();
-  // for later
-  menu();
-  settingdiff();
-  difficulty();
-  //life = EASY_LIVES;
-  startTime = millis();
-  screenlayout();
-  // scoreDots();
-  // place holder score
-  //score = 100;
-  while (true) {
-    movement();
-    ghostMovement();
-    livesDisplay();
-    recording();
-    //Serial.println(checkButton);
-    if (life == 0){
-      endTime = millis();
-      delta = endTime-startTime;
-      Serial.println("You died");
-      break;
+  while(true){
+    restart = false;
+    comDone = false;
+    sendScore = false;
+    numCounter = 0;
+    setup();
+    // for later
+    menu();
+    settingdiff();
+    difficulty();
+    //life = EASY_LIVES;
+    startTime = millis();
+    screenlayout();
+    // scoreDots();
+    // place holder score
+    //score = 100;
+    while (true) {
+      movement();
+      ghostMovement();
+      livesDisplay();
+      recording();
+      //Serial.println(checkButton);
+      if (life == 0){
+        endTime = millis();
+        delta = endTime-startTime;
+        Serial.println("You died");
+        break;
+      }
+
     }
-
+    score = (delta/1000);
+    String strScore = endGame(score);
+    // just keep sending it
+    Serial.println("after endgame");
+    while (comDone == false){
+      clientCommunication(strScore);
+    }
+    Serial.println("after cleint com");
+    highScoreScreen(numberOfScores);
+    while (restart == false){
+      checkReset();
+    }
+    Serial.flush();
   }
-  score = (delta/1000);
-  String strScore = endGame(score);
-  // just keep sending it
-  Serial.println("after endgame");
-  while (comDone == false){
-    clientCommunication(strScore);
-  }
-  Serial.println("after cleint com");
-  highScoreScreen(numberOfScores);
-  Serial.flush();
-
   Serial.end();
   return 0;
 }
