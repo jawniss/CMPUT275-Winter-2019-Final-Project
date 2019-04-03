@@ -1,47 +1,5 @@
 /*
 
-
-FOR THE GHOSTS, RESTRAINING THEM TO THE PATHS, THIS IS WHAT TO DO:
-CHANGE 'cursorX' AND cursorY TO GHOSTX AND GHOSTY
-CHANGE THE if (xVal > 555)
-TO if (ghostpos == 1, 2, 3)
-ETC ::::::: 1 IF THE GHOST IS BELOW, 2 IF THE GHOST
-IS ABOVE, 3 IF ... ETC
-
-
-
-
-I THINK CAN DO SAME WITH THE PLAYER - COULD PROLLY MAKE INTO A ONE METHOD,
-FOR THE PLAYER MAKE IF XVAL > 555 : variable = 1
-METHOD WOULD BE
-movement(xVAR, yVAR)
-change the If (xVal > 555) to if (xvar == 1)
-
-
-For the score dots, when pacman moves over them they don't get
-redrawn, perfect for this project
-  simply make a counter
-  if (position of pacman % 2 [or something] == number ) {
-  score counter += 10
-}
-do this for each line of dots
-
-
-
-for the rewind part
-  make it push the position of the player and ghosts to the stack every
-  once in a while etc every 5 seconds
-
-  to actually do the rewind part, take from off the stack the positions,
-  and one at a time adjust the positions of the players and ghosts to match
-  the popped position. after that is reached, take the next position, and
-  repeat, going to that position
-
-
-
-
-
-
 ORIENTATION
 
 (0,            (240,
@@ -58,23 +16,6 @@ ORIENTATION
       XXXXXXXXXX
 
 
-
-don't have to make the pathways exactly the size of pacman,
-actually preferabbly not so user can have some wiggle room
-all we have to do is make the ghosts follow the centre of the
-path, like
-
-|        .        |
-|        .        |
-|        .        |
-|        .        |
-|        .        |
-
-make paths narrow enough so that pacman would obviously touch
-ghosts
-
-
-LETS ADD THE "1 UP" FEATURE >> IF SCORE == 100, LIVES++; SCORE = 0;
 */
 
 
@@ -176,7 +117,7 @@ int bSpeed;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
-int rewind[200][10] = {0};
+int rewind[100][11] = {0};
 int rewindindex = 0;
 
 bool ghost = true;
@@ -456,11 +397,7 @@ void screenlayout() {
   // Borders of map
   tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
 
-  // // walls square
-  // tft.fillRect(120,120,50,50,ILI9341_BLUE);
-
   tft.fillRect(0, 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
-  tft.fillRect(0, 10, 3, 30, ILI9341_BLUE);
 
   // Squares inside borders
 
@@ -511,7 +448,7 @@ String endGame(int pointScore){
   tft.setCursor(10,80);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
-  tft.print("you scored: ");
+  tft.print("Your score is: ");
   tft.println(value);
   return value;
 }
@@ -2394,7 +2331,7 @@ void recording() {
   oldreREDY, PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY,
   CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY,
   ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY,
-  WHITErewindX, WHITErewindY, oldreWHITEX, oldreWHITEY;
+  WHITErewindX, oldreWHITEX;
   int recordingpressed = digitalRead(JOY_SEL);
   int countdown = 3;
   int yVal = analogRead(JOY_HORIZ);
@@ -2415,14 +2352,13 @@ void recording() {
     rewind[rewindindex][8] = oCursorX;
     rewind[rewindindex][9] = oCursorY;
     rewind[rewindindex][10] = wCursorX;
-    rewind[rewindindex][11] = wCursorY;
     rewindindex++;
   }
   if (start == 0 && recordingpressed == LOW) {
     Serial.println("Recording");
     start = 1;
     delay(500);
-  } else if (start == 1 && recordingpressed == LOW || rewindindex == 199) {
+  } else if (start == 1 && recordingpressed == LOW || rewindindex == 99) {
     Serial.println("Done recording");
     start = 0;
 
@@ -2445,7 +2381,6 @@ void recording() {
       oldreORANGEX = ORANGErewindX;
       oldreORANGEY = ORANGErewindY;
       oldreWHITEX = WHITErewindX;
-      oldreWHITEY = WHITErewindY;
       rewindX = rewind[e][0];
       rewindY = rewind[e][1];
       REDrewindX = rewind[e][2];
@@ -2457,17 +2392,16 @@ void recording() {
       ORANGErewindX = rewind[e][8];
       ORANGErewindY = rewind[e][9];
       WHITErewindX = rewind[e][10];
-      WHITErewindY = rewind[e][11];
       if (rewindX != oldreX || rewindY != oldreY) {
         redrawPacman(rewindX, rewindY, oldreX, oldreY);
         redrawRedGhost(REDrewindX, REDrewindY, oldreREDX, oldreREDY);
         redrawPinkGhost(PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY);
         redrawCyanGhost(CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY);
         redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
-        redrawWhiteGhost(WHITErewindX, WHITErewindY, oldreWHITEX, oldreWHITEY);
+        redrawWhiteGhost(WHITErewindX, 160, oldreWHITEX, 160);
       }
       travelling();
-      delay(25);
+      delay(60);
     }
     rewindindex = 0;
     cursorX = rewind[0][0];
@@ -2481,7 +2415,14 @@ void recording() {
     oCursorX = rewind[0][8];
     oCursorY = rewind[0][9];
     wCursorX = rewind[0][10];
-    wCursorY = rewind[0][11];
+    // tft.fillRect(0, 20, DISPLAY_HEIGHT - 20, DISPLAY_WIDTH - 30, ILI9341_RED);
+    // redrawPacman(rewindX, rewindY, rewindX, rewindY);
+    // redrawRedGhost(REDrewindX, REDrewindY, REDrewindX, REDrewindY);
+    // redrawPinkGhost(PINKrewindX, PINKrewindY, PINKrewindX, PINKrewindY);
+    // redrawCyanGhost(CYANrewindX, CYANrewindY, CYANrewindX, CYANrewindY);
+    // redrawOrangeGhost(ORANGErewindX, ORANGErewindY, ORANGErewindX, ORANGErewindY);
+    // redrawWhiteGhost(WHITErewindX, 160, WHITErewindX, 160);
+    // travelling();
     Serial.println("DONE");
     delay(500);
   }
