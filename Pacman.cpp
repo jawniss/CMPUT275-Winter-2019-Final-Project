@@ -1,23 +1,5 @@
 /*
 
-
-FOR THE GHOSTS, RESTRAINING THEM TO THE PATHS, THIS IS WHAT TO DO:
-CHANGE 'cursorX' AND cursorY TO GHOSTX AND GHOSTY
-CHANGE THE if (xVal > 555)
-TO if (ghostpos == 1, 2, 3)
-ETC ::::::: 1 IF THE GHOST IS BELOW, 2 IF THE GHOST
-IS ABOVE, 3 IF ... ETC
-
-
-
-
-I THINK CAN DO SAME WITH THE PLAYER - COULD PROLLY MAKE INTO A ONE METHOD,
-FOR THE PLAYER MAKE IF XVAL > 555 : variable = 1
-METHOD WOULD BE
-movement(xVAR, yVAR)
-change the If (xVal > 555) to if (xvar == 1)
-
-
 For the score dots, when pacman moves over them they don't get
 redrawn, perfect for this project
   simply make a counter
@@ -25,21 +7,6 @@ redrawn, perfect for this project
   score counter += 10
 }
 do this for each line of dots
-
-
-
-for the rewind part
-  make it push the position of the player and ghosts to the stack every
-  once in a while etc every 5 seconds
-
-  to actually do the rewind part, take from off the stack the positions,
-  and one at a time adjust the positions of the players and ghosts to match
-  the popped position. after that is reached, take the next position, and
-  repeat, going to that position
-
-  instead of rewind part, we can do checkpoints
-  if the player presses the joystick midgame it saves a
-  checkpoint, and they can later select a checkpoint?
 
 
 
@@ -149,7 +116,7 @@ int beginrewind = 0;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove;
 
-int rewind[500][2] = {0};
+int rewind[200][10] = {0};
 int rewindindex = 0;
 
 bool ghost = true;
@@ -168,18 +135,6 @@ bool ghost = true;
 
 
 
-
-/*
-
-struct ghoststruct {
-  int xpos;
-  int ypos;
-  string colour; <- not sure if string type works here
-}
-
-
-
-*/
 
 void travelling() {
 
@@ -704,20 +659,16 @@ void movement() {
   // // For pacman we don't want to have variable speed movement
   if (yVal > 567) {
     ymove = PAC_SPEED;
-  }
-  else if (yVal < 467) {
+  } else if (yVal < 467) {
     ymove = -PAC_SPEED;
-  }
-  else {
+  } else {
     ymove = 0;
   }
   if (xVal > 555) {
     xmove = PAC_SPEED;
-  }
-  else if (xVal < 455) {
+  } else if (xVal < 455) {
     xmove = -PAC_SPEED;
-  }
-  else {
+  } else {
     xmove = 0;
   }
 
@@ -732,7 +683,6 @@ if (cursorX > 60 && cursorX < 180) {
     ymove = 0;
     cursorX = constrain(cursorX, 60, 180);
   }
-
 }
 
 if (cursorX >20 && cursorX < 60) {
@@ -2277,23 +2227,39 @@ if (cursorX == 130 && cursorY == 30) {
 
 
 void recording() {
-  int rewindX, rewindY, oldreX, oldreY;
+  int rewindX, rewindY, oldreX, oldreY, REDrewindX, REDrewindY, oldreREDX,
+  oldreREDY, PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY,
+  CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY,
+  ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY;
   int recordingpressed = digitalRead(JOY_SEL);
   int countdown = 5;
-  if (start == 1 && rewindindex < 500) {
-    Serial.print("RECRDOINGIGN");
+  int yVal = analogRead(JOY_HORIZ);
+  int xVal = analogRead(JOY_VERT);
+  if (start == 1 && rewindindex < 200 && xVal > 555 ||
+    start == 1 && rewindindex < 200 && xVal < 455 ||
+    start == 1 && rewindindex < 200 && yVal > 567 ||
+    start == 1 && rewindindex < 200 && yVal < 467) {
+    Serial.print("RECORDING");
     rewind[rewindindex][0] = cursorX;
     rewind[rewindindex][1] = cursorY;
+    rewind[rewindindex][2] = rCursorX;
+    rewind[rewindindex][3] = rCursorY;
+    rewind[rewindindex][4] = pCursorX;
+    rewind[rewindindex][5] = pCursorY;
+    rewind[rewindindex][6] = cCursorX;
+    rewind[rewindindex][7] = cCursorY;
+    rewind[rewindindex][8] = oCursorX;
+    rewind[rewindindex][9] = oCursorY;
     rewindindex++;
   }
   if (start == 0 && recordingpressed == LOW) {
     Serial.println("Recording");
     start = 1;
     delay(500);
-  } else if (start == 1 && recordingpressed == LOW || rewindindex == 499) {
+  } else if (start == 1 && recordingpressed == LOW || rewindindex == 199) {
     Serial.println("Done recording");
     start = 0;
-    beginrewind = 1;
+
     while (countdown != 0) {
       Serial.print("Starting rewind in ");
       Serial.print(countdown);
@@ -2302,22 +2268,47 @@ void recording() {
       delay(1000);
     }
     for (int e = rewindindex; e >= 0; e--) {
-      Serial.print(rewind[e][0]);
-      Serial.println(rewind[e][1]);
       oldreX = rewindX;
       oldreY = rewindY;
+      oldreREDX = REDrewindX;
+      oldreREDY = REDrewindY;
+      oldrePINKX = PINKrewindX;
+      oldrePINKY = PINKrewindY;
+      oldreCYANX = CYANrewindX;
+      oldreCYANY = CYANrewindY;
+      oldreORANGEX = ORANGErewindX;
+      oldreORANGEY = ORANGErewindY;
       rewindX = rewind[e][0];
       rewindY = rewind[e][1];
+      REDrewindX = rewind[e][2];
+      REDrewindY = rewind[e][3];
+      PINKrewindX = rewind[e][4];
+      PINKrewindY = rewind[e][5];
+      CYANrewindX = rewind[e][6];
+      CYANrewindY = rewind[e][7];
+      ORANGErewindX = rewind[e][8];
+      ORANGErewindY = rewind[e][9];
       if (rewindX != oldreX || rewindY != oldreY) {
         redrawPacman(rewindX, rewindY, oldreX, oldreY);
+        redrawRedGhost(REDrewindX, REDrewindY, oldreREDX, oldreREDY);
+        redrawPinkGhost(PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY);
+        redrawCyanGhost(CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY);
+        redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
       }
       travelling();
-      delay(50);
+      delay(25);
     }
     rewindindex = 0;
     cursorX = rewind[0][0];
     cursorY = rewind[0][1];
-
+    rCursorX = rewind[0][2];
+    rCursorY = rewind[0][3];
+    pCursorX = rewind[0][4];
+    pCursorY = rewind[0][5];
+    cCursorX = rewind[0][6];
+    cCursorY = rewind[0][7];
+    oCursorX = rewind[0][8];
+    oCursorY = rewind[0][9];
     Serial.println("DONE");
     delay(500);
   }
@@ -2326,7 +2317,6 @@ void recording() {
 
 
 int main() {
-  ghost = false;
   setup();
   // for later
   //menu();
