@@ -175,7 +175,7 @@ int bSpeed;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
-int rewind[200][10] = {0};
+int rewind[200][12] = {0};
 int rewindindex = 0;
 
 bool ghost = true;
@@ -2390,9 +2390,10 @@ void recording() {
   int rewindX, rewindY, oldreX, oldreY, REDrewindX, REDrewindY, oldreREDX,
   oldreREDY, PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY,
   CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY,
-  ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY;
+  ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY,
+  WHITErewindX, WHITErewindY, oldreWHITEX, oldreWHITEY;
   int recordingpressed = digitalRead(JOY_SEL);
-  int countdown = 5;
+  int countdown = 3;
   int yVal = analogRead(JOY_HORIZ);
   int xVal = analogRead(JOY_VERT);
   if (start == 1 && rewindindex < 200 && xVal > 555 ||
@@ -2410,6 +2411,8 @@ void recording() {
     rewind[rewindindex][7] = cCursorY;
     rewind[rewindindex][8] = oCursorX;
     rewind[rewindindex][9] = oCursorY;
+    rewind[rewindindex][10] = wCursorX;
+    rewind[rewindindex][11] = wCursorY;
     rewindindex++;
   }
   if (start == 0 && recordingpressed == LOW) {
@@ -2438,6 +2441,8 @@ void recording() {
       oldreCYANY = CYANrewindY;
       oldreORANGEX = ORANGErewindX;
       oldreORANGEY = ORANGErewindY;
+      oldreWHITEX = WHITErewindX;
+      oldreWHITEY = WHITErewindY;
       rewindX = rewind[e][0];
       rewindY = rewind[e][1];
       REDrewindX = rewind[e][2];
@@ -2448,12 +2453,15 @@ void recording() {
       CYANrewindY = rewind[e][7];
       ORANGErewindX = rewind[e][8];
       ORANGErewindY = rewind[e][9];
+      WHITErewindX = rewind[e][10];
+      WHITErewindY = rewind[e][11];
       if (rewindX != oldreX || rewindY != oldreY) {
         redrawPacman(rewindX, rewindY, oldreX, oldreY);
         redrawRedGhost(REDrewindX, REDrewindY, oldreREDX, oldreREDY);
         redrawPinkGhost(PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY);
         redrawCyanGhost(CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY);
         redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
+        redrawWhiteGhost(WHITErewindX, WHITErewindY, oldreWHITEX, oldreWHITEY);
       }
       travelling();
       delay(25);
@@ -2469,6 +2477,8 @@ void recording() {
     cCursorY = rewind[0][7];
     oCursorX = rewind[0][8];
     oCursorY = rewind[0][9];
+    wCursorX = rewind[0][10];
+    wCursorY = rewind[0][11];
     Serial.println("DONE");
     delay(500);
   }
