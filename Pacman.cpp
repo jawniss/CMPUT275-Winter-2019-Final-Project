@@ -1,5 +1,47 @@
 /*
 
+
+FOR THE GHOSTS, RESTRAINING THEM TO THE PATHS, THIS IS WHAT TO DO:
+CHANGE 'cursorX' AND cursorY TO GHOSTX AND GHOSTY
+CHANGE THE if (xVal > 555)
+TO if (ghostpos == 1, 2, 3)
+ETC ::::::: 1 IF THE GHOST IS BELOW, 2 IF THE GHOST
+IS ABOVE, 3 IF ... ETC
+
+
+
+
+I THINK CAN DO SAME WITH THE PLAYER - COULD PROLLY MAKE INTO A ONE METHOD,
+FOR THE PLAYER MAKE IF XVAL > 555 : variable = 1
+METHOD WOULD BE
+movement(xVAR, yVAR)
+change the If (xVal > 555) to if (xvar == 1)
+
+
+For the score dots, when pacman moves over them they don't get
+redrawn, perfect for this project
+  simply make a counter
+  if (position of pacman % 2 [or something] == number ) {
+  score counter += 10
+}
+do this for each line of dots
+
+
+
+for the rewind part
+  make it push the position of the player and ghosts to the stack every
+  once in a while etc every 5 seconds
+
+  to actually do the rewind part, take from off the stack the positions,
+  and one at a time adjust the positions of the players and ghosts to match
+  the popped position. after that is reached, take the next position, and
+  repeat, going to that position
+
+
+
+
+
+
 ORIENTATION
 
 (0,            (240,
@@ -16,6 +58,23 @@ ORIENTATION
       XXXXXXXXXX
 
 
+
+don't have to make the pathways exactly the size of pacman,
+actually preferabbly not so user can have some wiggle room
+all we have to do is make the ghosts follow the centre of the
+path, like
+
+|        .        |
+|        .        |
+|        .        |
+|        .        |
+|        .        |
+
+make paths narrow enough so that pacman would obviously touch
+ghosts
+
+
+LETS ADD THE "1 UP" FEATURE >> IF SCORE == 100, LIVES++; SCORE = 0;
 */
 
 
@@ -117,7 +176,7 @@ int bSpeed;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
-int rewind[100][11] = {0};
+int rewind[200][10] = {0};
 int rewindindex = 0;
 
 bool ghost = true;
@@ -397,7 +456,11 @@ void screenlayout() {
   // Borders of map
   tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
 
+  // // walls square
+  // tft.fillRect(120,120,50,50,ILI9341_BLUE);
+
   tft.fillRect(0, 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
+  tft.fillRect(0, 10, 3, 30, ILI9341_BLUE);
 
   // Squares inside borders
 
@@ -448,7 +511,7 @@ String endGame(int pointScore){
   tft.setCursor(10,80);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
-  tft.print("Your score is: ");
+  tft.print("you scored: ");
   tft.println(value);
   return value;
 }
