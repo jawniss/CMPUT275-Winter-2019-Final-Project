@@ -1,46 +1,6 @@
 /*
 
 
-FOR THE GHOSTS, RESTRAINING THEM TO THE PATHS, THIS IS WHAT TO DO:
-CHANGE 'cursorX' AND cursorY TO GHOSTX AND GHOSTY
-CHANGE THE if (xVal > 555)
-TO if (ghostpos == 1, 2, 3)
-ETC ::::::: 1 IF THE GHOST IS BELOW, 2 IF THE GHOST
-IS ABOVE, 3 IF ... ETC
-
-
-
-
-I THINK CAN DO SAME WITH THE PLAYER - COULD PROLLY MAKE INTO A ONE METHOD,
-FOR THE PLAYER MAKE IF XVAL > 555 : variable = 1
-METHOD WOULD BE
-movement(xVAR, yVAR)
-change the If (xVal > 555) to if (xvar == 1)
-
-
-For the score dots, when pacman moves over them they don't get
-redrawn, perfect for this project
-  simply make a counter
-  if (position of pacman % 2 [or something] == number ) {
-  score counter += 10
-}
-do this for each line of dots
-
-
-
-for the rewind part
-  make it push the position of the player and ghosts to the stack every
-  once in a while etc every 5 seconds
-
-  to actually do the rewind part, take from off the stack the positions,
-  and one at a time adjust the positions of the players and ghosts to match
-  the popped position. after that is reached, take the next position, and
-  repeat, going to that position
-
-
-
-
-
 
 ORIENTATION
 
@@ -57,24 +17,6 @@ ORIENTATION
 (0,320)
       XXXXXXXXXX
 
-
-
-don't have to make the pathways exactly the size of pacman,
-actually preferabbly not so user can have some wiggle room
-all we have to do is make the ghosts follow the centre of the
-path, like
-
-|        .        |
-|        .        |
-|        .        |
-|        .        |
-|        .        |
-
-make paths narrow enough so that pacman would obviously touch
-ghosts
-
-
-LETS ADD THE "1 UP" FEATURE >> IF SCORE == 100, LIVES++; SCORE = 0;
 */
 
 
@@ -173,13 +115,20 @@ int bSpeed;
 #define CORNER_4_X 220
 #define CORNER_4_Y 300
 
-int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
+int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY, multiplier;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
-int rewind[200][10] = {0};
+int rewind[200][11] = {0};
 int rewindindex = 0;
 
 bool ghost = true;
+
+const int SimonSaysLEDs[3] = { 13, 12, 11 };
+const int ButtonMiniG[3] = { 8, 7, 3 };
+
+int Array[20] = {10};
+
+
 
 #define MAX_SCORES 100
 
@@ -283,6 +232,22 @@ void setup() {
 
   tft.begin();
 
+  pinMode(SimonSaysLEDs[0], OUTPUT);
+  pinMode(SimonSaysLEDs[1], OUTPUT);
+  pinMode(SimonSaysLEDs[2], OUTPUT);
+
+  // configure the button pins to be a digital INPUT
+  // turn on the internal pull-up resistors
+  pinMode(ButtonMiniG[0], INPUT);
+  digitalWrite(ButtonMiniG[0], HIGH);
+  pinMode(ButtonMiniG[1], INPUT);
+  digitalWrite(ButtonMiniG[1], HIGH);
+  pinMode(ButtonMiniG[2], INPUT);
+  digitalWrite(ButtonMiniG[2], HIGH);
+
+  digitalWrite(SimonSaysLEDs[0], LOW);
+  digitalWrite(SimonSaysLEDs[1], LOW);
+  digitalWrite(SimonSaysLEDs[2], LOW);
 }
 
 void menu(){
@@ -455,13 +420,7 @@ void screenlayout() {
   tft.fillCircle(cursorX, cursorY, PACMAN_SIZE, ILI9341_YELLOW);
   // Borders of map
   tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
-
-  // // walls square
-  // tft.fillRect(120,120,50,50,ILI9341_BLUE);
-
   tft.fillRect(0, 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
-  tft.fillRect(0, 10, 3, 30, ILI9341_BLUE);
-
   // Squares inside borders
 
   travelling();
@@ -511,7 +470,7 @@ String endGame(int pointScore){
   tft.setCursor(10,80);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
-  tft.print("you scored: ");
+  tft.print("Your score: ");
   tft.println(value);
   return value;
 }
@@ -2399,11 +2358,8 @@ void recording() {
   int countdown = 3;
   int yVal = analogRead(JOY_HORIZ);
   int xVal = analogRead(JOY_VERT);
-  if (start == 1 && rewindindex < 200 && xVal > 555 ||
-    start == 1 && rewindindex < 200 && xVal < 455 ||
-    start == 1 && rewindindex < 200 && yVal > 567 ||
-    start == 1 && rewindindex < 200 && yVal < 467) {
-    Serial.print("RECORDING");
+  if (start == 1 && rewindindex < 200) {
+    digitalWrite(SimonSaysLEDs[1], HIGH);
     rewind[rewindindex][0] = cursorX;
     rewind[rewindindex][1] = cursorY;
     rewind[rewindindex][2] = rCursorX;
@@ -2426,12 +2382,31 @@ void recording() {
     start = 0;
 
     while (countdown != 0) {
+      if (countdown == 3) {
+        digitalWrite(SimonSaysLEDs[0], HIGH);
+        digitalWrite(SimonSaysLEDs[1], HIGH);
+        digitalWrite(SimonSaysLEDs[2], HIGH);
+      }
+      if (countdown == 2) {
+        digitalWrite(SimonSaysLEDs[0], HIGH);
+        digitalWrite(SimonSaysLEDs[1], HIGH);
+        digitalWrite(SimonSaysLEDs[2], LOW);
+      }
+      if (countdown == 1) {
+        digitalWrite(SimonSaysLEDs[0], HIGH);
+        digitalWrite(SimonSaysLEDs[1], LOW);
+        digitalWrite(SimonSaysLEDs[2], LOW);
+      }
       Serial.print("Starting rewind in ");
       Serial.print(countdown);
       Serial.println(" seconds ...");
       countdown--;
       delay(1000);
     }
+    digitalWrite(SimonSaysLEDs[0], LOW);
+    digitalWrite(SimonSaysLEDs[1], LOW);
+    digitalWrite(SimonSaysLEDs[2], LOW);
+
     for (int e = rewindindex; e >= 0; e--) {
       oldreX = rewindX;
       oldreY = rewindY;
@@ -2484,12 +2459,124 @@ void recording() {
     redrawPinkGhost(PINKrewindX, PINKrewindY, PINKrewindX, PINKrewindY);
     redrawCyanGhost(CYANrewindX, CYANrewindY, CYANrewindX, CYANrewindY);
     redrawOrangeGhost(ORANGErewindX, ORANGErewindY, ORANGErewindX, ORANGErewindY);
-    redrawWhiteGhost(WHITErewindX, 160, WHITErewindX, 160);
+    redrawWhiteGhost(WHITErewindX, 160, oldreWHITEX, 160);
     travelling();
     Serial.println("DONE");
     delay(500);
   }
 }
+
+
+void SimonSays() {
+	delay(1000);
+  multiplier = 1;
+	bool failed = false;
+	int counter = 1;
+	int variedlight;
+	for (int position = 0; position < 20; position++) {
+		Array[position] = random(3);
+	}
+	for (int i = 0; i < 20; i++) {
+		Serial.print(Array[i]);
+	}
+	Serial.println();
+	digitalWrite(SimonSaysLEDs[0], HIGH);
+	digitalWrite(SimonSaysLEDs[1], HIGH);
+	digitalWrite(SimonSaysLEDs[2], HIGH);
+	delay(1000);
+	digitalWrite(SimonSaysLEDs[0], LOW);
+	digitalWrite(SimonSaysLEDs[1], LOW);
+	digitalWrite(SimonSaysLEDs[2], LOW);
+	delay(2000);
+	while (failed == false) {
+		for (int whichlight = 0; whichlight < counter; whichlight++) {
+			digitalWrite(SimonSaysLEDs[Array[whichlight]], HIGH);
+			delay(700);
+			digitalWrite(SimonSaysLEDs[Array[whichlight]], LOW);
+			delay(500);
+		}
+
+
+
+		int test = 0;
+		bool keepgoing = true;
+		while(keepgoing == true) {
+			if (test == counter) {
+				counter++;
+				keepgoing = false;
+        multiplier += 0.5;
+				delay(300);
+			}
+			if (digitalRead(ButtonMiniG[0]) == LOW && Array[test] == 0) {
+				digitalWrite(SimonSaysLEDs[0], HIGH);
+				test++;
+				Serial.println(counter);
+				delay(300);
+				digitalWrite(SimonSaysLEDs[0], LOW);
+			}
+			if (digitalRead(ButtonMiniG[1]) == LOW && Array[test] == 1) {
+				digitalWrite(SimonSaysLEDs[1], HIGH);
+				test++;
+				Serial.println(counter);
+				delay(300);
+				digitalWrite(SimonSaysLEDs[1], LOW);
+			}
+			if (digitalRead(ButtonMiniG[2]) == LOW && Array[test] == 2) {
+				digitalWrite(SimonSaysLEDs[2], HIGH);
+				test++;
+				Serial.println(counter);
+				delay(300);
+				digitalWrite(SimonSaysLEDs[2], LOW);
+			}
+			if (digitalRead(ButtonMiniG[0]) == LOW && Array[test] != 0 ||
+					digitalRead(ButtonMiniG[1]) == LOW && Array[test] != 1 ||
+					digitalRead(ButtonMiniG[2]) == LOW && Array[test] != 2) {
+						digitalWrite(SimonSaysLEDs[0], HIGH);
+						digitalWrite(SimonSaysLEDs[1], HIGH);
+						digitalWrite(SimonSaysLEDs[2], HIGH);
+						delay(1000);
+						digitalWrite(SimonSaysLEDs[0], HIGH);
+						digitalWrite(SimonSaysLEDs[1], HIGH);
+						digitalWrite(SimonSaysLEDs[2], LOW);
+						delay(1000);
+						digitalWrite(SimonSaysLEDs[0], HIGH);
+						digitalWrite(SimonSaysLEDs[1], LOW);
+						digitalWrite(SimonSaysLEDs[2], LOW);
+						delay(1000);
+						digitalWrite(SimonSaysLEDs[0], LOW);
+						digitalWrite(SimonSaysLEDs[1], LOW);
+						digitalWrite(SimonSaysLEDs[2], LOW);
+						delay(1000);
+						digitalWrite(SimonSaysLEDs[0], HIGH);
+						digitalWrite(SimonSaysLEDs[1], HIGH);
+						digitalWrite(SimonSaysLEDs[2], HIGH);
+						delay(500);
+						digitalWrite(SimonSaysLEDs[0], LOW);
+						digitalWrite(SimonSaysLEDs[1], LOW);
+						digitalWrite(SimonSaysLEDs[2], LOW);
+						delay(500);
+						digitalWrite(SimonSaysLEDs[0], HIGH);
+						digitalWrite(SimonSaysLEDs[1], HIGH);
+						digitalWrite(SimonSaysLEDs[2], HIGH);
+						delay(500);
+						digitalWrite(SimonSaysLEDs[0], LOW);
+						digitalWrite(SimonSaysLEDs[1], LOW);
+						digitalWrite(SimonSaysLEDs[2], LOW);
+				Serial.println("Failed");
+				failed = true;
+				keepgoing = false;
+				delay(300);
+			}
+
+		}
+
+		Serial.println("DONE");
+
+	}
+}
+
+
+
 
 
 void highScoreScreen(int iteration){
@@ -2570,8 +2657,11 @@ int main() {
       }
 
     }
+
     score = (delta/1000);
-    String strScore = endGame(score);
+    SimonSays();
+    int newscore = score * multiplier;
+    String strScore = endGame(newscore);
     // just keep sending it
     Serial.println("after endgame");
     while (comDone == false){
