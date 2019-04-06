@@ -1,84 +1,12 @@
 /*
-
-
-FOR THE GHOSTS, RESTRAINING THEM TO THE PATHS, THIS IS WHAT TO DO:
-CHANGE 'cursorX' AND cursorY TO GHOSTX AND GHOSTY
-CHANGE THE if (xVal > 555)
-TO if (ghostpos == 1, 2, 3)
-ETC ::::::: 1 IF THE GHOST IS BELOW, 2 IF THE GHOST
-IS ABOVE, 3 IF ... ETC
-
-
-
-
-I THINK CAN DO SAME WITH THE PLAYER - COULD PROLLY MAKE INTO A ONE METHOD,
-FOR THE PLAYER MAKE IF XVAL > 555 : variable = 1
-METHOD WOULD BE
-movement(xVAR, yVAR)
-change the If (xVal > 555) to if (xvar == 1)
-
-
-For the score dots, when pacman moves over them they don't get
-redrawn, perfect for this project
-  simply make a counter
-  if (position of pacman % 2 [or something] == number ) {
-  score counter += 10
-}
-do this for each line of dots
-
-
-
-for the rewind part
-  make it push the position of the player and ghosts to the stack every
-  once in a while etc every 5 seconds
-
-  to actually do the rewind part, take from off the stack the positions,
-  and one at a time adjust the positions of the players and ghosts to match
-  the popped position. after that is reached, take the next position, and
-  repeat, going to that position
-
-
-
-
-
-
-ORIENTATION
-
-(0,            (240,
-0)                  0)
-  _______________
- |               |
- |               |
- |               |  YYYYYYYYYY
- |               |
- |               |
- |               |
- |_______________| (240, 320)
-(0,320)
-      XXXXXXXXXX
-
-
-
-don't have to make the pathways exactly the size of pacman,
-actually preferabbly not so user can have some wiggle room
-all we have to do is make the ghosts follow the centre of the
-path, like
-
-|        .        |
-|        .        |
-|        .        |
-|        .        |
-|        .        |
-
-make paths narrow enough so that pacman would obviously touch
-ghosts
-
-
-LETS ADD THE "1 UP" FEATURE >> IF SCORE == 100, LIVES++; SCORE = 0;
+# ----------------------------------------------
+#   Name: Ricky Au, Johnas Wong
+#   ID: 1529429, 1529241
+#   CMPUT 275, Winter 2019
+#
+#   Final Project: Pacman
+# ----------------------------------------------
 */
-
-
-
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
@@ -92,12 +20,10 @@ LETS ADD THE "1 UP" FEATURE >> IF SCORE == 100, LIVES++; SCORE = 0;
 #define TFT_CS 10
 #define SD_CS 6
 
-
 #define PACMAN_SIZE 7
 #define GHOST_SIZE 7
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-
 
 // physical dimensions of the tft display (# of pixels)
 #define DISPLAY_WIDTH  320
@@ -123,18 +49,19 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define MINPRESSURE   10
 #define MAXPRESSURE 1000
 
-
+// initialize all modes to false
 bool sendScore = false;
 bool comDone = false;
 bool restart = false;
 
 int cursorX, cursorY;
 int xmove, ymove;
+
 int screenmidX = DISPLAY_WIDTH/2;
 int screenmidY = DISPLAY_HEIGHT/2;
 
-unsigned long score;
-unsigned long diffMultiplier;
+unsigned long score, diffMultiplier, multiplier;
+
 int start = 0;
 int beginrewind = 0;
 
@@ -142,17 +69,22 @@ int life;
 int ghostSpeed;
 int bSpeed;
 
+// definition of the lives given for each diffuculty
 #define EASY_LIVES 7
 #define MEDIUM_LIVES 5
 #define HARD_LIVES 3
 
+// all speed definitions
 #define PAC_SPEED 5
 #define EASY_GHOST_SPEED 1
 #define MEDIUM_GHOST_SPEED 2
 #define EASY_BLACK_SPEED 2
 #define HARD_BLACK_SPEED 5
+
+// definition of number of pixels it requires to count a touch
 #define TOUCH_SIZE 7
 
+// starting locations of all ghosts
 #define START_RED_X 160
 #define START_RED_Y 200
 #define START_PINK_X 120
@@ -174,12 +106,17 @@ int bSpeed;
 #define CORNER_4_X 220
 #define CORNER_4_Y 300
 
-int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY, multiplier;
+// definition of number of scores storable
+#define MAX_SCORES 100
+
+// initializing of ghost postions
+int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
 int rewind[200][10] = {0};
 int rewindindex = 0;
 
+// case to turn on ghosts or not
 bool ghost = true;
 
 const int SimonSaysLEDs[3] = { 13, 12, 11 };
@@ -187,14 +124,15 @@ const int ButtonMiniG[3] = { 8, 7, 3 };
 
 int Array[20] = {10};
 
-#define MAX_SCORES 100
-
+// struct that stores the names of players and the points they scored
 struct Rankings{
   String names;
   unsigned int points;
 };
+// array of struct Rankings
 Rankings playerRecord[MAX_SCORES];
 
+// struct for the 3 diffuculty settings saving their names
 struct DifficultySettings{
   String diffName;
 };
@@ -280,7 +218,7 @@ void travelling() {
 
 }
 
-
+// setup function that begins serialcoms
 void setup() {
   init();
   Serial.begin(9600);
@@ -307,88 +245,84 @@ void setup() {
   digitalWrite(SimonSaysLEDs[2], LOW);
 }
 
+// first menu when the game starts
 void menu(){
-  tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
+  // draw the screen all black first
+  tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(10,80);
   tft.setTextSize(4);
   tft.setTextColor(ILI9341_BLACK, ILI9341_YELLOW);
   tft.println(" PAC-MAN ");
-
+  // draw the Red Ghost
   tft.fillRect(62-2, 200-1, 19, 18, ILI9341_RED);
   tft.fillRect(62-1, 200-2, 17, 14, ILI9341_RED);
   tft.fillRect(62 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(62 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(62 + 3, 200, 4, 4, ILI9341_BLACK);
   tft.fillRect(62 + 9, 200, 4, 4, ILI9341_BLACK);
-
+  // draw the Cyan Ghost
   tft.fillRect(92-2, 200-1, 19, 18, ILI9341_CYAN);
   tft.fillRect(92-1, 200-2, 17, 14, ILI9341_CYAN);
   tft.fillRect(92 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(92 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(92 + 3, 200, 4, 4, ILI9341_BLACK);
   tft.fillRect(92 + 9, 200, 4, 4, ILI9341_BLACK);
-
+  // draw the Magenta Ghost
   tft.fillRect(122-2, 200-1, 19, 18, ILI9341_MAGENTA);
   tft.fillRect(122-1, 200-2, 17, 14, ILI9341_MAGENTA);
   tft.fillRect(122 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(122 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(122 + 3, 200, 4, 4, ILI9341_BLACK);
   tft.fillRect(122 + 9, 200, 4, 4, ILI9341_BLACK);
-
+  // draw the Orange ghost
   tft.fillRect(152-2, 200-1, 19, 18, ILI9341_ORANGE);
   tft.fillRect(152-1, 200-2, 17, 14, ILI9341_ORANGE);
   tft.fillRect(152 + 1, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(152 + 7, 200 - 1, 6, 7, ILI9341_WHITE);
   tft.fillRect(152 + 3, 200, 4, 4, ILI9341_BLACK);
   tft.fillRect(152 + 9, 200, 4, 4, ILI9341_BLACK);
-
+  // draw pacman
   tft.fillCircle(192, 207, 9, ILI9341_YELLOW);
-
+  // tell the user an instruction
   tft.setCursor(40,280);
   tft.setTextSize(1);
   tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
   tft.println(" PRESS JOYSTICK TO START ! ");
-
-  Serial.println(" almost at while");
+  // if they press the button exit
   while (true){
-    //processJoystick();
     int checkButton = digitalRead(JOY_SEL);
-    //Serial.println(checkButton);
     if (checkButton == LOW){
-      Serial.println("button pressed");
       break;
     }
   }
 }
 
+// function that sets the Strings for the names of the diffeculties
 void settingdiff(){
   difSet[0].diffName = " EASY ";
   difSet[1].diffName = " MEDIUM ";
   difSet[2].diffName = " HARD ";
-
 }
 
+// function for the schrollable menu
 void drawPick(int selected, int previous, bool mode){
-  Serial.println("in drawpick ");
-  tft.setCursor(2, 40);
-  tft.setTextSize(2);
-  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.println(" Select Diffuculty ");
+  // case where you have already drawn the initial screen
   if (mode == true) {
     tft.setCursor(0, 100);
     tft.setTextSize(3);
-    // if you moved in list mode
+    // if you moved the joystick
     if (previous != selected) {
       for (int16_t i = 0; i < 3; i++) {
+        // draw the case where your cursor is on that setting
         if (i == selected) {
           tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
           tft.println(difSet[i].diffName);
+        // case to unhighlight
         } else if (i == previous) {
-          // unhighlight
           tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
           tft.println(difSet[i].diffName);
+        // keep restaurants the same if you didn't move
         } else {
-          // keep restaurants the same if you didn't move towards it
           tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
           tft.println("");
         }
@@ -397,12 +331,18 @@ void drawPick(int selected, int previous, bool mode){
   // case for when you entered the list from map
   // draw all names that are close
   } else {
+    tft.setCursor(2, 40);
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+    tft.println(" Select Diffuculty ");
     tft.setCursor(0, 100);
     tft.setTextSize(3);
     for (int i = 0; i < 3; i ++) {
-      if (i == selected) {  // highlight
+      // highlight
+      if (i == selected) {
         // black characters on white background
         tft.setTextColor(ILI9341_BLACK, ILI9341_WHITE);
+      // not highlighted
       } else {  // not highlighted
         // white characters on black background
         tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
@@ -413,35 +353,40 @@ void drawPick(int selected, int previous, bool mode){
   }
 }
 
+// function to set the conditions of each difuculty
 void setGame(int position){
   // set lives and ghost speeds here
+  // if selected the top one "easy"
   if (position == 0){
     life = EASY_LIVES;
     ghostSpeed = EASY_GHOST_SPEED;
     bSpeed = EASY_BLACK_SPEED;
     diffMultiplier = 2;
+  // if selected the middle one "medium"
   }else if (position == 1){
     life = MEDIUM_LIVES;
     ghostSpeed = MEDIUM_GHOST_SPEED;
     bSpeed = EASY_BLACK_SPEED;
     diffMultiplier = 5;
+  // if selected the bottom one "hard"
   }else if (position == 2){
     life = HARD_LIVES;
     ghostSpeed = MEDIUM_GHOST_SPEED;
     bSpeed = HARD_BLACK_SPEED;
     diffMultiplier = 10;
+  // case for debug perposes
   }else {
     Serial.println("should never get here");
   }
 }
 
+// function that reads the joystick input and decides what position your at
 void difficulty(){
   bool diffSelect = false;
   bool drawMode = false;
   int position = 0;
   int previousPosition = position;
   tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
-  Serial.println("in diff ");
   drawPick(position, previousPosition, drawMode);
   while(diffSelect == false){
     int yRead = analogRead(JOY_HORIZ);
@@ -471,7 +416,7 @@ void difficulty(){
   }
 }
 
-
+// function that draws the initial starting layout of the game
 void screenlayout() {
   tft.fillScreen(ILI9341_BLACK);
   // Pacman starting spot
@@ -480,15 +425,10 @@ void screenlayout() {
   tft.fillCircle(cursorX, cursorY, PACMAN_SIZE, ILI9341_YELLOW);
   // Borders of map
   tft.fillRect(0, DISPLAY_WIDTH - 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
-
-  // // walls square
-  // tft.fillRect(120,120,50,50,ILI9341_BLUE);
-
   tft.fillRect(0, 10, DISPLAY_HEIGHT, 4, ILI9341_BLUE);
   tft.fillRect(0, 10, 3, 30, ILI9341_BLUE);
 
-  // Squares inside borders
-
+  // call function that draws the path pacman is allowed to take
   travelling();
 
   tft.setTextSize(1);
@@ -513,22 +453,18 @@ void screenlayout() {
 
     // draw red ghost
     tft.fillCircle(rCursorX, rCursorY, GHOST_SIZE, ILI9341_RED);
-
-    // // if we want to make them look like ghosts leave for later
-    // tft.fillRect(rCursorX-2, rCursorY-1, 8, 7, ILI9341_RED);
-    // tft.fillRect(rCursorX-1, rCursorY-2, 6, 3, ILI9341_RED);
-
     // draw pink ghost
     tft.fillCircle(pCursorX, pCursorY, GHOST_SIZE, ILI9341_MAGENTA);
-
+    // draw blue ghost
     tft.fillCircle(cCursorX, cCursorY, GHOST_SIZE, ILI9341_CYAN);
-
+    // draw orange ghost
     tft.fillCircle(oCursorX, oCursorY, GHOST_SIZE, ILI9341_ORANGE);
-
+    // draw white ghost
     tft.fillCircle(wCursorX, wCursorY, GHOST_SIZE, ILI9341_WHITE);
   }
 }
 
+// function that reads a score and outputs it to the screen
 String endGame(int pointScore){
   // output a different screen if you won
   tft.fillScreen(ILI9341_BLACK);// draw the screen all black first
@@ -541,12 +477,10 @@ String endGame(int pointScore){
   return value;
 }
 
+// function to communicate to server
 void clientCommunication(String score){
-  // if (numCounter == numberOfScores){
-  //   comDone = true;
-  // }
+  // case for if we just finished the game and need to send a score
   if ((sendScore == false) && (comDone == false)) {
-    //Serial.flush();
     Serial.print("Score");
     Serial.print(" ");
     Serial.println(score);
@@ -587,51 +521,55 @@ void clientCommunication(String score){
       Serial.setTimeout(1000);
       Serial.flush();
     }
+    // case if W is read
     else if (split[0] == 'W'){
       split = strtok(NULL," ");
-      // convert the latitude into int32_t
+      // convert the player name into string
       String pNames = String(split);
       split = strtok(NULL," ");
-      // convert the longintude into int32_t
+      // convert the score into string
       String strVals = String(split);
+      // then convert into int
       int pScore = strVals.toInt();
-      // store into shared variable along with a counter that stores the lon lat sent over from server
+      // store in our struct array the name ans score associated with it
+      // index using a counter
       playerRecord[numCounter].names = pNames;
       playerRecord[numCounter].points = pScore;
       Serial.flush();
-      // send acknowledgement after you recieve lon lat
+      // send acknowledgement after you recieve name and score
       Serial.print("A\n");
       // sets the maximum milliseconds to wait for serial data for 1 second for new point
       Serial.setTimeout(1000);
       Serial.flush();
       numCounter++;
     }
+    // if read an E we are finished
     else if (split[0] == 'E'){
       comDone = true;
     }
   }
 }
 
+// function that checks if a ghost touch pacman
 void checkTouch(int pacX, int pacY, int ghostX, int ghostY){
   if ((abs(pacX - ghostX) < TOUCH_SIZE) && (abs(pacY - ghostY) < TOUCH_SIZE)){
     life = life - 1;
-    Serial.println("hit");
     // delay so you don't die instantly
     delay(200);
   }
 }
 
+// function that displays current lives of player
 void livesDisplay(){
   String strLife = String(life);
   // Score, lives counters
   tft.setCursor(0,0);
   tft.setTextSize(1);
-
   tft.print("  Lives: ");
   tft.print(life);
-
 }
 
+// functions redraw pacman, redghost, pinkghsot, cyanghost, orangeghost, whiteghost
 void redrawPacman (int newX, int newY, int oldX, int oldY) {
   tft.fillCircle(oldX, oldY, PACMAN_SIZE, ILI9341_BLACK);
   tft.fillCircle(newX, newY, PACMAN_SIZE, ILI9341_YELLOW);
@@ -662,6 +600,7 @@ void redrawWhiteGhost(int newX, int newY, int oldX, int oldY) {
   tft.fillCircle(newX, newY, GHOST_SIZE, ILI9341_WHITE);
 }
 
+// functions that decide which direction the ghosts will move
 void redGhostMove(int pacX, int pacY, int ghostX, int ghostY){
   // move ghost to the left if it is to the right
   if ((pacX - ghostX) < 0){
@@ -738,6 +677,7 @@ void orangeGhostMove(int pacX, int pacY, int ghostX, int ghostY){
   oCursorY += oYMove;
 }
 
+// unlike other ghosts white ghost only goes left to right through the tunnel
 void whiteGhostMove(){
   wCursorX += bSpeed;
   if (wCursorX > 240){
@@ -745,6 +685,7 @@ void whiteGhostMove(){
   }
 }
 
+// function that calls all ghost movments
 void ghostMovements(){
   int oldRedX = rCursorX;
   int oldRedY = rCursorY;
@@ -761,7 +702,7 @@ void ghostMovements(){
   int oldWhiteX = wCursorX;
   int oldWhiteY = wCursorY;
 
-  // maybe have ghosts move at all times when we get paths done
+  //move then ghost redraw the ghosts then check if ghosts touched pacman
   redGhostMove(cursorX,cursorY,rCursorX,rCursorY);
   redrawRedGhost(rCursorX,rCursorY, oldRedX,oldRedY);
   checkTouch(cursorX,cursorY,rCursorX,rCursorY);
@@ -825,7 +766,6 @@ void ghostMovements(){
     oCursorX = CORNER_3_X;
     oCursorY = CORNER_3_Y;
   }
-
 }
 
 void movement() {
@@ -2406,6 +2346,7 @@ void movement() {
   delay(10);
 }
 
+// function that redraws the paths the ghosts overlaped on the map
 void ghostMovement(){
   if (ghost == true){
     ghostMovements();
@@ -2640,8 +2581,8 @@ void SimonSays() {
 	}
 }
 
+// function that takes in the number of scores sent over from server and show the highscore screen on the tft display
 void highScoreScreen(int iteration){
-  // draw the screen all black first
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
   tft.setTextSize(1);
@@ -2653,82 +2594,84 @@ void highScoreScreen(int iteration){
   tft.setCursor(180, 0);
   tft.setTextSize(1);
   tft.print("Score");
+  // loop through the numbers and print them to the display
   for (int i = 0; i < (iteration-1); i++) {
     String strIter = String(i+1);
     tft.setCursor(0, (i+1)*8);
     tft.setTextSize(1);
     tft.print(strIter);
-    //tft.print("           ");
     tft.setCursor(50, (i+1)*8);
     tft.setTextSize(1);
     tft.print(playerRecord[i].names);
-    //tft.print("           ");
     tft.setCursor(180, (i+1)*8);
     tft.setTextSize(1);
     String strPScore = String(playerRecord[i].points);
     tft.println(strPScore);
-
-    Serial.print("name: ");
-    Serial.print(playerRecord[i].names);
-    Serial.print(" score: ");
-    Serial.println(strPScore);
   }
 }
 
+// function that checks if the user wants to replay the game
 void checkReset(){
   int buttonPush = digitalRead(JOY_SEL);
   if (buttonPush == LOW){
+    // send E to server so it knows to reset
     Serial.println("E");
     Serial.flush();
     restart = true;
   }
 }
 
-
 int main() {
   unsigned long startTime, endTime;
   unsigned long delta = 0;
+  // while loop to allow game to go on indefinately without recompiling
   while(true){
+    // set all conditions back to intial
     restart = false;
     comDone = false;
     sendScore = false;
     numCounter = 0;
+    // call setup function
     setup();
-    // for later
+    // display menue to player
     menu();
+    // allow player to select diffuculty
     settingdiff();
     difficulty();
-    //life = EASY_LIVES;
+    // start game timer once diffuculty selected
     startTime = millis();
+    // draw out map
     screenlayout();
-    // scoreDots();
-    // place holder score
-    //score = 100;
+    // loop until death
     while (true) {
+      // pacmans movement
       movement();
+      // ghosts movements
       ghostMovement();
+      // refresh lives
       livesDisplay();
       recording();
-      //Serial.println(checkButton);
+      // if you run out of lives break out of game
       if (life == 0){
+        // obtain how low you survived for
         endTime = millis();
         delta = endTime-startTime;
-        Serial.println("You died");
         break;
       }
-
     }
+    // calculate the score in seconds by converting from milliseconds
     score = (delta/1000);
     SimonSays();
+    // get full score after multiplying all multipliers
     unsigned long newScore = score * multiplier * diffMultiplier;
     String strScore = endGame(newScore);
-    // just keep sending it
-    Serial.println("after endgame");
+    //client commmunicate your score
     while (comDone == false){
       clientCommunication(strScore);
     }
-    Serial.println("after cleint com");
+    // display highscores
     highScoreScreen(numberOfScores);
+    // check if user wants to replay game
     while (restart == false){
       checkReset();
     }
