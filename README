@@ -1,0 +1,73 @@
+# ----------------------------------------------
+#   Name: Ricky Au, Johnas Wong
+#   ID: 1529429, 1529241
+#   CMPUT 275, Winter 2019
+#
+#   Final Project: Pacman: client
+# ----------------------------------------------
+
+Included Files:
+    * README
+Included Files: Pacman Client
+    * Makefile
+    *
+    *
+Included Files: Highscore server
+    *
+    *
+    *
+
+Accessories:
+    * 1 Arduino Mega Board (AMG)
+    * 19 wires
+    * 1 Adafruit ILI9341 (display)
+    * 1 SainSmart JoyStick
+    * 1 micro sd card preloaded with lcd_image.h and lcd_image.cpp
+
+Wiring instructions:
+    Source: Wiring for Adafruit ILI9341 File (on eclass)
+    For Display:
+    Board Pin <---> Arduino Pin
+    ===========================
+    GND       <--->      GND
+    Vin       <--->      5V
+    3Vo                  NOT CONNECTED
+    CLK       <--->      52
+    MISO      <--->      50
+    MOSI      <--->      51
+    CS        <--->      10
+    D/C       <--->       9
+    RST                  NOT CONNECTED
+    Lite                 NOT CONNECTED
+    Y+        <--->      A2 (analog pin)
+    X+        <--->       4  (digital pin)
+    Y-        <--->       5  (digital pin)
+    X-        <--->      A3 (analog pin)
+    IM0 - IM3            NOT CONNECTED (they expect a 3.3v signal, DON'T CONNECT!)
+    CCS       <--->       6
+    CD                   NOT CONNECTED
+
+    For Joy-stick:
+    VRx       <--->       A1
+    VRy       <--->       A0
+    SW        <--->       D2
+
+    For Minigame
+
+
+Running Instructions:
+    1) enter the file directory and type "make" into the terminal
+    2) then type "make upload"
+    3)
+    4)
+    5)
+    6)
+NOTES:
+    1)
+
+Sources:
+    1) function mfill line 218 highscore.cpp
+       https://stackoverflow.com/questions/37150306/how-to-reinitialize-array-of-struct by user M.M
+    2) swap function built off eclass quicksort
+    3) All server client communication built off of our Assignment 2 part 2
+    4)

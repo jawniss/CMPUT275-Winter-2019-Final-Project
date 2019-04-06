@@ -4,7 +4,7 @@
 #   ID: 1529429, 1529241
 #   CMPUT 275, Winter 2019
 #
-#   Final Project: Pacman
+#   Final Project: Pacman: client
 # ----------------------------------------------
 */
 
