@@ -2375,7 +2375,9 @@ void recording() {
     digitalWrite(SimonSaysLEDs[0], LOW);
     digitalWrite(SimonSaysLEDs[1], LOW);
     digitalWrite(SimonSaysLEDs[2], LOW);
-    // The actual rewind part, 
+    // The actual rewind part, iterate backwards through the 'recording' array
+    // and redraw the previous positions of the ghosts and player until the
+    // time the rewind button was first pressed
     for (int e = rewindindex; e >= 0; e--) {
       oldreX = rewindX;
       oldreY = rewindY;
@@ -2407,9 +2409,12 @@ void recording() {
         redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
         redrawWhiteGhost(WHITErewindX, 160, oldreWHITEX, 160);
       }
+      // redraw the path
       travelling();
       delay(60);
     }
+    // After the rewind is finished, the 'new' positions of everyone is the
+    // start of the recording, when the Jostick was first pressed.
     rewindindex = 0;
     cursorX = rewind[0][0];
     cursorY = rewind[0][1];
@@ -2422,6 +2427,14 @@ void recording() {
     oCursorX = rewind[0][8];
     oCursorY = rewind[0][9];
     wCursorX = rewind[0][10];
+    // with this many ghosts being recorded, the arduino lags and freezes for
+    // a few ticks, causing the redraws to leave behind pixels of the ghosts and
+    // player, so we redraw the black background and then everything else to
+    // get rid of the left-behind traces. To confirm this issue was caused
+    // by the arduino lagging/freezing, we changed the 'rewind[200][10]' array
+    // to 'rewind[200][2]' to only record the PlayerX and PlayerY coordinates and
+    // performed the rewind using only 'cursorX = rewind[0][0]' and 'cursorY = rewind[0][1]'
+    // and the player is perfectly rewinded without any left-beind traces.
     tft.fillRect(0, 20, DISPLAY_HEIGHT, DISPLAY_WIDTH - 30, ILI9341_BLACK);
     redrawPacman(rewindX, rewindY, rewindX, rewindY);
     redrawRedGhost(REDrewindX, REDrewindY, REDrewindX, REDrewindY);
@@ -2435,18 +2448,25 @@ void recording() {
   }
 }
 
+// The lights minigame that occurs at the end of the game when the player loses
+// all their lives
 void SimonSays() {
 	delay(1000);
+  // multiplier to multiply the final score by at the end
   multiplier = 1;
 	bool failed = false;
+  // counter for iterating through the simonsays array
 	int counter = 1;
-	int variedlight;
+  // put a random number from 0 - 2 into the array. each index/number is which
+  // light will be turned on
 	for (int position = 0; position < 20; position++) {
 		simonsaysOrder[position] = random(3);
 	}
+  // printing the array to the serial-monitor so we could see the solution
 	for (int i = 0; i < 20; i++) {
 		Serial.print(simonsaysOrder[i]);
 	}
+  // a visual to see that the game is about to start
 	Serial.println();
 	digitalWrite(SimonSaysLEDs[0], HIGH);
 	digitalWrite(SimonSaysLEDs[1], HIGH);
@@ -2456,25 +2476,44 @@ void SimonSays() {
 	digitalWrite(SimonSaysLEDs[1], LOW);
 	digitalWrite(SimonSaysLEDs[2], LOW);
 	delay(2000);
+  // Only end the game if the player fails or if the player completes all
+  // stages of simon says
 	while (failed == false) {
+    // using the 'counter' variable, iterate through the array from the start
+    // each time to find which light is to be lit (each time from the start
+    // of the array because that's how simon says is played, each stage is 1 more
+    // step from the previous)
 		for (int whichlight = 0; whichlight < counter; whichlight++) {
 			digitalWrite(SimonSaysLEDs[simonsaysOrder[whichlight]], HIGH);
 			delay(700);
 			digitalWrite(SimonSaysLEDs[simonsaysOrder[whichlight]], LOW);
 			delay(500);
 		}
-
-
-
+    // test is another counter for the index of the solutions array
 		int test = 0;
 		bool keepgoing = true;
 		while(keepgoing == true) {
+      // if the test index counter is equivilant to the first counter, that means
+      // the stage has been passed and the next stage of simon says can start
 			if (test == counter) {
+        // there are only 20 stages (20 indexes in the solutions array) so if
+        // 'test' reaches 20, that means the player passed every stage of the
+        // game, and so the game should end.
+        if (test == 20) {
+          multipler += 0.5;
+          keepgoing = false;
+          failed = true;
+          Serial.println("You beat Simon Says! Maximum score multiplier achieved.");
+        }
 				counter++;
 				keepgoing = false;
         multiplier += 0.5;
 				delay(300);
 			}
+      // if the correct light was pressed, increment the array index to check
+      // if the next light is correct too
+      // turns on the LED for a brief second for visual confirmation the
+      // button was pressed
 			if (digitalRead(ButtonMiniG[0]) == LOW && simonsaysOrder[test] == 0) {
 				digitalWrite(SimonSaysLEDs[0], HIGH);
 				test++;
@@ -2496,6 +2535,8 @@ void SimonSays() {
 				delay(300);
 				digitalWrite(SimonSaysLEDs[2], LOW);
 			}
+      // If the wrong button is pressed, end the game. The LEDs turning on and
+      // off is just a visual to signify the game is over
 			if (digitalRead(ButtonMiniG[0]) == LOW && simonsaysOrder[test] != 0 ||
 					digitalRead(ButtonMiniG[1]) == LOW && simonsaysOrder[test] != 1 ||
 					digitalRead(ButtonMiniG[2]) == LOW && simonsaysOrder[test] != 2) {
@@ -2535,11 +2576,8 @@ void SimonSays() {
 				keepgoing = false;
 				delay(300);
 			}
-
 		}
-
 		Serial.println("DONE");
-
 	}
 }
 

@@ -28,12 +28,6 @@ void setup() {
 	digitalWrite(SimonSaysLEDs[2], LOW);
 }
 
-
-
-
-
-
-
 void SimonSays() {
 	delay(1000);
 	bool failed = false;
