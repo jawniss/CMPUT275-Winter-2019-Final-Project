@@ -6,16 +6,30 @@
 #   Final Project: Pacman
 # ----------------------------------------------
 
+Description of Project:
+    We created a Pacman recreation on the arduino. Our game requires has the user choose
+    a diffuculty at the beginning of each game. The three diffuculties effect hwo many lives
+    you have and how fast the ghosts will move at. Another change we made in our game is
+    the ghosts are able to move through walls but pacman is confined to paths on the map.
+    The ghosts move towards pacman at all times if they ever overlap each other they teleport
+    back to one of the ghosts starting postions. When the player runs out of lives by being
+    touched by the ghosts too many times the player will play through a lights minigame similar
+    to simon says where the player must copy what the lights displayed on the led. Once the
+    minigame is finished. The player is able to see how their score stacked up with previous
+    highscores. If the player wants to play the game again they may press the joystick again
+    to prompt for inputing name and play the game.
 Included Files:
     * README
 Included Files: Pacman Client
     * Makefile
-    *
-    *
+    * Pacman.cpp
+
 Included Files: Highscore server
-    *
-    *
-    *
+    * Makefile
+    * highscore.cpp
+    * serialport.cpp
+    * serialport.h
+    * scores.txt
 
 Accessories:
     * 1 Arduino Mega Board (AMG)
@@ -68,9 +82,11 @@ Running Instructions:
     1) enter the file directory and type make upload into the terminal
     2) enter the "Highscores" directory and enter "make"
     3) type ""./highscores" in the terminal
-    4) the terinal should prompt you to enter a name
+    4) the terminal should prompt you to enter a name
     5) after entering a name, follow the instructions on the LCD display
     6) Play our version of pacman!
+    7) When game is over and you see the list of higscores press joystick to play again
+    8) going through from Steps 4) to 8)
 
 Sources:
     1) function mfill line 218 highscore.cpp

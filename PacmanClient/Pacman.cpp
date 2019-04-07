@@ -4,7 +4,7 @@
 #   ID: 1529429, 1529241
 #   CMPUT 275, Winter 2019
 #
-#   Final Project: Pacman: client
+#   Final Project: Pacman client
 # ----------------------------------------------
 */
 
@@ -42,7 +42,6 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 #define XM A3  // must be an analog pin, use "An" notation!
 #define YM  5  // can be a digital pin
 #define XP  4  // can be a digital pin
-
 
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
@@ -113,16 +112,19 @@ int bSpeed;
 int rCursorX, rCursorY, pCursorX, pCursorY, cCursorX, cCursorY, oCursorX, oCursorY, wCursorX, wCursorY;
 int rXMove,rYMove, pXMove, pYMove, cXMove, cYMove, oXMove, oYMove, wXMove, wYMove;
 
+// Initialize array to record the positions of player and ghosts for rewind feature
 int rewind[200][10] = {0};
 int rewindindex = 0;
 
 // case to turn on ghosts or not
 bool ghost = true;
 
+// Initialize Arduino pins for the LEDS and buttons
 const int SimonSaysLEDs[3] = { 13, 12, 11 };
 const int ButtonMiniG[3] = { 8, 7, 3 };
 
-int Array[20] = {10};
+// Array for Simon says minigame
+int simonsaysOrder[20] = {10};
 
 // struct that stores the names of players and the points they scored
 struct Rankings{
@@ -141,6 +143,7 @@ DifficultySettings difSet[3];
 int numberOfScores = 100;
 int numCounter = 0;
 
+// Draw the path of pacman for a visual
 void travelling() {
 
   tft.drawLine(60, 240, 180, 240, ILI9341_WHITE);
@@ -768,6 +771,8 @@ void ghostMovements(){
   }
 }
 
+
+// Constraining the player to only move along the drawn paths
 void movement() {
   int yVal = analogRead(JOY_HORIZ);
   int xVal = analogRead(JOY_VERT);
@@ -775,10 +780,11 @@ void movement() {
   // copy the cursor position (to check later if it changed)
   int oldX = cursorX;
   int oldY = cursorY;
+  // If the joystick is in the deadzone, don't move Pacman
   if (455 < xVal && 555 > xVal && yVal < 567 && 467 < yVal) {
     return;
   }
-  // // For pacman we don't want to have variable speed movement
+  // For pacman we don't want to have variable speed movement unlike Assign2
   if (yVal > 567) {
     ymove = PAC_SPEED;
   }
@@ -798,28 +804,24 @@ void movement() {
     xmove = 0;
   }
 
-
-  // // BOTTTOM HALF
-
-  //HORIZTONAL lines
-  // line 1
+  // Movement along horizontal lines, constraining veritcal movement
   if (cursorX > 60 && cursorX < 180) {
     if (cursorY == 240) {
       cursorY = constrain(cursorY, 240, 240);
       ymove = 0;
       cursorX = constrain(cursorX, 60, 180);
     }
-
   }
 
-  if (cursorX >20 && cursorX < 60) {
+  if (cursorX > 20 && cursorX < 60) {
     if (cursorY == 270) {
       cursorY = constrain(cursorY, 270, 270);
       ymove = 0;
       cursorX = constrain(cursorX, 20, 60);
     }
   }
-  if (cursorX >180 && cursorX < 220) {
+
+  if (cursorX > 180 && cursorX < 220) {
     if (cursorY == 270) {
       cursorY = constrain(cursorY, 270, 270);
       ymove = 0;
@@ -827,21 +829,22 @@ void movement() {
     }
   }
 
-
-  if (cursorX >90 && cursorX < 110) {
+  if (cursorX > 90 && cursorX < 110) {
     if (cursorY == 270) {
       cursorY = constrain(cursorY, 270, 270);
       ymove = 0;
       cursorX = constrain(cursorX, 90, 110);
     }
   }
-  if (cursorX >130 && cursorX < 150) {
+
+  if (cursorX > 130 && cursorX < 150) {
     if (cursorY == 270) {
       cursorY = constrain(cursorY, 270, 270);
       ymove = 0;
       cursorX = constrain(cursorX, 130, 150);
     }
   }
+
   if (cursorX > 20 && cursorX < 300) {
     if (cursorY == 300) {
       cursorY = constrain(cursorY, 300, 300);
@@ -850,10 +853,8 @@ void movement() {
     }
   }
 
-
-
   if (cursorY == 240) {
-    if (cursorX >20 && cursorX < 40) {
+    if (cursorX > 20 && cursorX < 40) {
       ymove = 0;
       cursorY = constrain(cursorY, 240, 240);
       cursorX = constrain(cursorX, 20, 40);
@@ -865,13 +866,11 @@ void movement() {
   }
 
   if (cursorY == 210) {
-    if (cursorX >20 && cursorX < 110) {
-
+    if (cursorX > 20 && cursorX < 110) {
       cursorY = constrain(cursorY, 210, 210);
       ymove = 0;
       cursorX = constrain(cursorX, 20, 110);
     } else if (cursorX > 130 && cursorX < 220) {
-
       cursorY = constrain(cursorY, 210, 210);
       ymove = 0;
       cursorX = constrain(cursorX, 130, 220);
@@ -946,29 +945,7 @@ void movement() {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //VERTICAL lines
-  // line 1
+  // Movement along vertical lines, constraining horizontal movements
   if (cursorY < 270 && cursorY > 30) {
     if (cursorX == 60) {
       cursorX = constrain(cursorX, 60, 60);
@@ -981,7 +958,6 @@ void movement() {
     }
   }
 
-  //line 3
   if (cursorY < 300 && cursorY > 270) {
     if (cursorX == 20) {
       cursorX = constrain(cursorX, 20, 20);
@@ -993,7 +969,7 @@ void movement() {
       cursorY = constrain(cursorY, 270, 300);
     }
   }
-  //line 4
+
   if (cursorY < 270 && cursorY > 240) {
     if (cursorX == 90) {
       cursorX = constrain(cursorX, 90, 90);
@@ -1006,7 +982,6 @@ void movement() {
     }
   }
 
-
   if (cursorY < 300 && cursorY > 270) {
     if (cursorX == 110) {
       cursorX = constrain(cursorX, 110, 110);
@@ -1018,6 +993,7 @@ void movement() {
       cursorY = constrain(cursorY, 270, 300);
     }
   }
+
   if (cursorY < 270 && cursorY > 240) {
     if (cursorX == 40) {
       cursorX = constrain(cursorX, 40, 40);
@@ -1142,23 +1118,9 @@ void movement() {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //INTERSECTIONS
-  // inter 1 ***************
+// Intersections of vertical and horizontal lines - if the player is at one of
+// these locations, depending on the direction of the joystick, constrain
+// the movements to only veritcal or horizontal movements
     if (cursorX == 60 && cursorY == 240) {
       if (xVal > 555) {
         cursorY = constrain(cursorY, 240, 240);
@@ -1173,7 +1135,7 @@ void movement() {
         xmove = 0;
       }
     }
-    // inter 2
+
       if (cursorX == 180 && cursorY == 240) {
         if (xVal > 555) {
           xmove = 0;
@@ -1187,11 +1149,10 @@ void movement() {
           ymove = 0;
         }
       }
-    // inter 3
+
       if (cursorX == 60 && cursorY == 270) {
         if (xVal > 555) {
           cursorY = constrain(cursorY, 270, 270);
-
           xmove = 0;
         }
         if (yVal > 567) {
@@ -1203,7 +1164,7 @@ void movement() {
           ymove = 0;
         }
       }
-    // inter 4
+
       if (cursorX == 180 && cursorY == 270) {
         if (xVal > 555) {
           cursorY = constrain(cursorY, 270, 270);
@@ -1218,7 +1179,7 @@ void movement() {
           xmove = 0;
         }
       }
-    // inter 5
+
       if (cursorX == 20 && cursorY == 270) {
         if (xVal > 555) {
           cursorY = constrain(cursorY, 270, 270);
@@ -1235,6 +1196,7 @@ void movement() {
           xmove = 0;
         }
       }
+
     if (cursorX == 220 && cursorY == 270) {
       if (xVal > 555) {
         cursorY = constrain(cursorY, 270, 270);
@@ -1251,7 +1213,7 @@ void movement() {
         ymove = 0;
       }
     }
-    // inter 6
+
       if (cursorX == 20 && cursorY == 300) {
         if (xVal > 555) {
           cursorY = constrain(cursorY, 300, 300);
@@ -1264,10 +1226,10 @@ void movement() {
           ymove = -PAC_SPEED;
         }
         if (xVal < 455) {
-          xmove=0;
+          xmove = 0;
         }
       }
-    // inter 6
+
       if (cursorX == 220 && cursorY == 300) {
         if (xVal > 555) {
           xmove = 0;
@@ -1283,23 +1245,24 @@ void movement() {
           ymove = 0;
         }
       }
-  // inter 6 NOT WORKING
-        if (cursorX == 90 && cursorY == 240) {
-          if (xVal > 555) {
-            cursorY = constrain(cursorY, 240,240);
-            ymove = 0;
-            xmove = PAC_SPEED;
-          } else if (xVal < 455) {
-            cursorY = constrain(cursorY, 240,240);
-            ymove = 0;
-            xmove = -PAC_SPEED;
-          }
-          if (yVal > 567) {
-            cursorX = constrain(cursorX, 90, 90);
-            xmove = 0;
-            ymove = PAC_SPEED;
-        }
+
+    if (cursorX == 90 && cursorY == 240) {
+      if (xVal > 555) {
+        cursorY = constrain(cursorY, 240,240);
+        ymove = 0;
+        xmove = PAC_SPEED;
+      } else if (xVal < 455) {
+        cursorY = constrain(cursorY, 240,240);
+        ymove = 0;
+        xmove = -PAC_SPEED;
+      }
+      if (yVal > 567) {
+        cursorX = constrain(cursorX, 90, 90);
+        xmove = 0;
+        ymove = PAC_SPEED;
+      }
     }
+
     else if (cursorX == 150 && cursorY == 240) {
       if (xVal > 555) {
         cursorY = constrain(cursorY, 240,240);
@@ -1353,7 +1316,6 @@ void movement() {
     }
   }
 
-
   if (cursorX == 110 && cursorY == 270) {
     if (xVal < 455) {
       xmove = -PAC_SPEED;
@@ -1388,8 +1350,6 @@ void movement() {
     }
   }
 
-
-
   if (cursorX == 110 && cursorY == 300) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1406,6 +1366,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 130 && cursorY == 300) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1423,7 +1384,6 @@ void movement() {
     }
   }
 
-
   if (cursorX == 40 && cursorY == 270) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1440,6 +1400,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 200 && cursorY == 270) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1473,6 +1434,7 @@ void movement() {
       ymove = PAC_SPEED;
     }
   }
+
   if (cursorX == 200 && cursorY == 240) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1490,7 +1452,6 @@ void movement() {
     }
   }
 
-
   if (cursorX == 20 && cursorY == 240) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1507,6 +1468,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 220 && cursorY == 240) {
     if (xVal < 455) {
       xmove = -PAC_SPEED;
@@ -1524,7 +1486,6 @@ void movement() {
     }
   }
 
-
   if (cursorX == 20 && cursorY == 210) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1541,6 +1502,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 220 && cursorY == 210) {
     if (xVal < 455) {
       xmove = -PAC_SPEED;
@@ -1557,7 +1519,6 @@ void movement() {
       ymove = 0;
     }
   }
-
 
   if (cursorX == 110 && cursorY == 240) {
     if (xVal < 455) {
@@ -1609,6 +1570,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 130 && cursorY == 210) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1626,10 +1588,8 @@ void movement() {
     }
   }
 
-
-
-  // FOR SOME REASON AT THESE INTERSECTIONS IT HAS A TOUGH TIME GOING LEFT AND RIGHT, BUT IT DOES WORK IF YOU WIGGLE THE STICK
-  if (cursorX == 60 && cursorY == 210 || cursorX == 60 && cursorY == 211 || cursorX == 60 && cursorY == 209) {
+// First 4-way Intersection
+  if (cursorX == 60 && cursorY == 210) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 210, 210);
       xmove = PAC_SPEED;
@@ -1651,6 +1611,7 @@ void movement() {
       cursorX = constrain(cursorX, 60, 60);
     }
   }
+
   if (cursorX == 180 && cursorY == 210) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 210, 210);
@@ -1673,8 +1634,6 @@ void movement() {
       cursorX = constrain(cursorX, 180, 180);
     }
   }
-
-
 
   if (cursorX == 90 && cursorY == 210) {
     if (xVal > 555) {
@@ -1711,8 +1670,6 @@ void movement() {
     }
   }
 
-
-
   if (cursorX == 90 && cursorY == 186) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 186, 186);
@@ -1727,6 +1684,7 @@ void movement() {
       xmove = 0;
     }
   }
+
   if (cursorX == 150 && cursorY == 186) {
     if (xVal < 455) {
       cursorY = constrain(cursorY, 186, 186);
@@ -1787,6 +1745,7 @@ void movement() {
       ymove = -PAC_SPEED;
     }
   }
+
   if (cursorX == 180 && cursorY == 160) {
     if (xVal > 555) {
       xmove = PAC_SPEED;
@@ -1823,6 +1782,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 240 && cursorY == 160) {
     if (xVal > 555) {
       cursorX = 0;
@@ -1841,7 +1801,6 @@ void movement() {
     }
   }
 
-
   if (cursorX == 90 && cursorY == 130) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 130, 130);
@@ -1859,6 +1818,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 150 && cursorY == 130) {
     if (xVal < 455) {
       cursorY = constrain(cursorY, 130, 130);
@@ -1924,6 +1884,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 130 && cursorY == 110) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 110, 110);
@@ -1959,6 +1920,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 150 && cursorY == 110) {
     if (xVal < 455) {
       cursorY = constrain(cursorY, 110, 110);
@@ -1994,6 +1956,7 @@ void movement() {
       ymove = 0;
     }
   }
+
   if (cursorX == 220 && cursorY == 110) {
     if (xVal < 455) {
       cursorY = constrain(cursorY, 110, 110);
@@ -2026,6 +1989,7 @@ void movement() {
       xmove = 0;
     }
   }
+
   if (cursorX == 180 && cursorY == 110) {
     if (xVal > 555) {
       cursorY = constrain(cursorY, 110, 110);
@@ -2315,31 +2279,16 @@ void movement() {
     }
   }
 
+// increment the x-coordinate and y-coordinate by the amount dictated by
+// the above conditions
+  cursorX += xmove;
+  cursorY += ymove;
+  // reset the increments or else the player would continue in the same direction
+  // until changed
+  xmove = 0;
+  ymove = 0;
 
-
-    cursorX += xmove;
-    cursorY += ymove;
-    xmove = 0;
-    ymove = 0;
-
-
-    // constrain so the cursor does not go off of the map display window
-    // the ending "-1"s make it perfectly not go off the edges
-    // cursorX = constrain(cursorX, PACMAN_SIZE, DISPLAY_HEIGHT - PACMAN_SIZE - 1);
-    // cursorY = constrain(cursorY, PACMAN_SIZE, DISPLAY_WIDTH - PACMAN_SIZE - 1);
-  // // concept of wall barrers is starting here, working to not be able to
-  // // pass from left or right of wall
-  // if (cursorY >120 && cursorY < 170) {
-  //   if (cursorX > 0 && cursorX < 170) {
-  //   cursorX = constrain(cursorX, 0, 120);
-  //   }
-  //   // else if (cursorX > 180 && cursorX < DISPLAY_WIDTH - PACMAN_SIZE) {
-  //     else {
-  //     cursorX = constrain(cursorX, 180, DISPLAY_WIDTH - PACMAN_SIZE);
-  //   }
-  // }
-    // walls(cursorX, cursorY);
-    // redraw the cursor only if its position actually changed
+  // only redraw the player if a movement was detected
   if (cursorX != oldX || cursorY != oldY) {
     redrawPacman(cursorX, cursorY, oldX, oldY);
   }
@@ -2355,16 +2304,24 @@ void ghostMovement(){
   delay(10);
 }
 
+// Rewind feature
 void recording() {
+  // initialize all the player and ghost locations
   int rewindX, rewindY, oldreX, oldreY, REDrewindX, REDrewindY, oldreREDX,
   oldreREDY, PINKrewindX, PINKrewindY, oldrePINKX, oldrePINKY,
   CYANrewindX, CYANrewindY, oldreCYANX, oldreCYANY,
   ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY,
   WHITErewindX, oldreWHITEX;
+  // variable to keep track of if the joystick is pressed
   int recordingpressed = digitalRead(JOY_SEL);
+  // Countdown timer for when the game is done recording and about to
+  // perform the rewind
   int countdown = 3;
+  // Jostick variables
   int yVal = analogRead(JOY_HORIZ);
   int xVal = analogRead(JOY_VERT);
+  // When recording, each tick the x and y coordinates of the player and ghosts
+  // are pushed onto the array
   if (start == 1 && rewindindex < 200) {
     digitalWrite(SimonSaysLEDs[1], HIGH);
     rewind[rewindindex][0] = cursorX;
@@ -2380,14 +2337,19 @@ void recording() {
     rewind[rewindindex][10] = wCursorX;
     rewindindex++;
   }
+  // If the joystick is pressed start recording
   if (start == 0 && recordingpressed == LOW) {
     Serial.println("Recording");
     start = 1;
     delay(500);
+    // If currently recording and the joystick is pressed again or the maximum
+    // size of the recording is reached, begin the playback/rewind
   } else if (start == 1 && recordingpressed == LOW || rewindindex == 99) {
     Serial.println("Done recording");
     start = 0;
-
+    // just a visual of the countdown - all lights are lit, then each second
+    // that passes one of the lights turns off until all 3 lights are off,
+    // signifying the game is about to rewind
     while (countdown != 0) {
       if (countdown == 3) {
         digitalWrite(SimonSaysLEDs[0], HIGH);
@@ -2413,7 +2375,9 @@ void recording() {
     digitalWrite(SimonSaysLEDs[0], LOW);
     digitalWrite(SimonSaysLEDs[1], LOW);
     digitalWrite(SimonSaysLEDs[2], LOW);
-
+    // The actual rewind part, iterate backwards through the 'recording' array
+    // and redraw the previous positions of the ghosts and player until the
+    // time the rewind button was first pressed
     for (int e = rewindindex; e >= 0; e--) {
       oldreX = rewindX;
       oldreY = rewindY;
@@ -2445,9 +2409,12 @@ void recording() {
         redrawOrangeGhost(ORANGErewindX, ORANGErewindY, oldreORANGEX, oldreORANGEY);
         redrawWhiteGhost(WHITErewindX, 160, oldreWHITEX, 160);
       }
+      // redraw the path
       travelling();
       delay(60);
     }
+    // After the rewind is finished, the 'new' positions of everyone is the
+    // start of the recording, when the Jostick was first pressed.
     rewindindex = 0;
     cursorX = rewind[0][0];
     cursorY = rewind[0][1];
@@ -2460,6 +2427,14 @@ void recording() {
     oCursorX = rewind[0][8];
     oCursorY = rewind[0][9];
     wCursorX = rewind[0][10];
+    // with this many ghosts being recorded, the arduino lags and freezes for
+    // a few ticks, causing the redraws to leave behind pixels of the ghosts and
+    // player, so we redraw the black background and then everything else to
+    // get rid of the left-behind traces. To confirm this issue was caused
+    // by the arduino lagging/freezing, we changed the 'rewind[200][10]' array
+    // to 'rewind[200][2]' to only record the PlayerX and PlayerY coordinates and
+    // performed the rewind using only 'cursorX = rewind[0][0]' and 'cursorY = rewind[0][1]'
+    // and the player is perfectly rewinded without any left-beind traces.
     tft.fillRect(0, 20, DISPLAY_HEIGHT, DISPLAY_WIDTH - 30, ILI9341_BLACK);
     redrawPacman(rewindX, rewindY, rewindX, rewindY);
     redrawRedGhost(REDrewindX, REDrewindY, REDrewindX, REDrewindY);
@@ -2473,18 +2448,25 @@ void recording() {
   }
 }
 
+// The lights minigame that occurs at the end of the game when the player loses
+// all their lives
 void SimonSays() {
 	delay(1000);
+  // multiplier to multiply the final score by at the end
   multiplier = 1;
 	bool failed = false;
+  // counter for iterating through the simonsays array
 	int counter = 1;
-	int variedlight;
+  // put a random number from 0 - 2 into the array. each index/number is which
+  // light will be turned on
 	for (int position = 0; position < 20; position++) {
-		Array[position] = random(3);
+		simonsaysOrder[position] = random(3);
 	}
+  // printing the array to the serial-monitor so we could see the solution
 	for (int i = 0; i < 20; i++) {
-		Serial.print(Array[i]);
+		Serial.print(simonsaysOrder[i]);
 	}
+  // a visual to see that the game is about to start
 	Serial.println();
 	digitalWrite(SimonSaysLEDs[0], HIGH);
 	digitalWrite(SimonSaysLEDs[1], HIGH);
@@ -2494,49 +2476,70 @@ void SimonSays() {
 	digitalWrite(SimonSaysLEDs[1], LOW);
 	digitalWrite(SimonSaysLEDs[2], LOW);
 	delay(2000);
+  // Only end the game if the player fails or if the player completes all
+  // stages of simon says
 	while (failed == false) {
+    // using the 'counter' variable, iterate through the array from the start
+    // each time to find which light is to be lit (each time from the start
+    // of the array because that's how simon says is played, each stage is 1 more
+    // step from the previous)
 		for (int whichlight = 0; whichlight < counter; whichlight++) {
-			digitalWrite(SimonSaysLEDs[Array[whichlight]], HIGH);
+			digitalWrite(SimonSaysLEDs[simonsaysOrder[whichlight]], HIGH);
 			delay(700);
-			digitalWrite(SimonSaysLEDs[Array[whichlight]], LOW);
+			digitalWrite(SimonSaysLEDs[simonsaysOrder[whichlight]], LOW);
 			delay(500);
 		}
-
-
-
+    // test is another counter for the index of the solutions array
 		int test = 0;
 		bool keepgoing = true;
 		while(keepgoing == true) {
+      // if the test index counter is equivilant to the first counter, that means
+      // the stage has been passed and the next stage of simon says can start
 			if (test == counter) {
+        // there are only 20 stages (20 indexes in the solutions array) so if
+        // 'test' reaches 20, that means the player passed every stage of the
+        // game, and so the game should end.
+        if (test == 20) {
+          multipler += 0.5;
+          keepgoing = false;
+          failed = true;
+          Serial.println("You beat Simon Says! Maximum score multiplier achieved.");
+        }
 				counter++;
 				keepgoing = false;
         multiplier += 0.5;
 				delay(300);
 			}
-			if (digitalRead(ButtonMiniG[0]) == LOW && Array[test] == 0) {
+      // if the correct light was pressed, increment the array index to check
+      // if the next light is correct too
+      // turns on the LED for a brief second for visual confirmation the
+      // button was pressed
+			if (digitalRead(ButtonMiniG[0]) == LOW && simonsaysOrder[test] == 0) {
 				digitalWrite(SimonSaysLEDs[0], HIGH);
 				test++;
 				Serial.println(counter);
 				delay(300);
 				digitalWrite(SimonSaysLEDs[0], LOW);
 			}
-			if (digitalRead(ButtonMiniG[1]) == LOW && Array[test] == 1) {
+			if (digitalRead(ButtonMiniG[1]) == LOW && simonsaysOrder[test] == 1) {
 				digitalWrite(SimonSaysLEDs[1], HIGH);
 				test++;
 				Serial.println(counter);
 				delay(300);
 				digitalWrite(SimonSaysLEDs[1], LOW);
 			}
-			if (digitalRead(ButtonMiniG[2]) == LOW && Array[test] == 2) {
+			if (digitalRead(ButtonMiniG[2]) == LOW && simonsaysOrder[test] == 2) {
 				digitalWrite(SimonSaysLEDs[2], HIGH);
 				test++;
 				Serial.println(counter);
 				delay(300);
 				digitalWrite(SimonSaysLEDs[2], LOW);
 			}
-			if (digitalRead(ButtonMiniG[0]) == LOW && Array[test] != 0 ||
-					digitalRead(ButtonMiniG[1]) == LOW && Array[test] != 1 ||
-					digitalRead(ButtonMiniG[2]) == LOW && Array[test] != 2) {
+      // If the wrong button is pressed, end the game. The LEDs turning on and
+      // off is just a visual to signify the game is over
+			if (digitalRead(ButtonMiniG[0]) == LOW && simonsaysOrder[test] != 0 ||
+					digitalRead(ButtonMiniG[1]) == LOW && simonsaysOrder[test] != 1 ||
+					digitalRead(ButtonMiniG[2]) == LOW && simonsaysOrder[test] != 2) {
 						digitalWrite(SimonSaysLEDs[0], HIGH);
 						digitalWrite(SimonSaysLEDs[1], HIGH);
 						digitalWrite(SimonSaysLEDs[2], HIGH);
@@ -2573,11 +2576,8 @@ void SimonSays() {
 				keepgoing = false;
 				delay(300);
 			}
-
 		}
-
 		Serial.println("DONE");
-
 	}
 }
 
