@@ -79,7 +79,7 @@ Wiring instructions:
 
 
 Running Instructions:
-    1) enter the file directory and type make upload into the terminal
+    1) enter the file directory of Pacman client and type make upload into the terminal
     2) enter the "Highscores" directory and enter "make"
     3) type ""./highscores" in the terminal
     4) the terminal should prompt you to enter a name
