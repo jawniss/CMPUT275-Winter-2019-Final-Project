@@ -8,7 +8,7 @@
 
 Description of Project:
     We created a Pacman recreation on the arduino. Our game requires has the user choose
-    a diffuculty at the beginning of each game. The three diffuculties effect hwo many lives
+    a diffuculty at the beginning of each game. The three diffuculties effect how many lives
     you have and how fast the ghosts will move at. Another change we made in our game is
     the ghosts are able to move through walls but pacman is confined to paths on the map.
     The ghosts move towards pacman at all times if they ever overlap each other they teleport
@@ -18,6 +18,19 @@ Description of Project:
     minigame is finished. The player is able to see how their score stacked up with previous
     highscores. If the player wants to play the game again they may press the joystick again
     to prompt for inputing name and play the game.
+
+LEDs minigame description:
+    The fundamental of this minigame is that of Simon Says - simply follow the
+    order of the lights that were shown. For example, if the array of the LEDS
+    was [2, 0, 1, 2, 2, 1, 0, 2, 1, 1, 1, 2, 0, 1, 0, 0, 2, 1, 0, 1], then the
+    first stage would be LED 2. It would light up for a moment, then the player
+    needs to press LED 2. The second stage would be 2, 0, and the player would
+    press LED 2 then 0. Stage three: 2, 0, 1, player presses 2, 0 and then 1.
+    Fourth stage: 2, 0, 1, 2, player presses LED 2, 0, 1, then 2. Each stage
+    starts from the beginning, and the player has to press each LED in the order
+    from the start. If at any point in the sequence the player presses the incorrect
+    LED, the game ends. It is, essentially, Simon Says with LEDS.
+
 Included Files:
     * README
 Included Files: Pacman Client
