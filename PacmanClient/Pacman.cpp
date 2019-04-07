@@ -2500,7 +2500,7 @@ void SimonSays() {
         // 'test' reaches 20, that means the player passed every stage of the
         // game, and so the game should end.
         if (test == 20) {
-          multipler += 0.5;
+          multiplier += 0.5;
           keepgoing = false;
           failed = true;
           Serial.println("You beat Simon Says! Maximum score multiplier achieved.");
